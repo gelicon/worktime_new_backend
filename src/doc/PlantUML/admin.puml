@@ -1,0 +1,108 @@
+@startuml
+page 2x2
+' Скрыть круг перед названием entity
+hide circle
+
+' Ломанные линии соединения
+skinparam linetype ortho
+
+title Gelicon Core Admin
+
+entity proguser {
+  Пользователь
+  --
+  * proguser_id : INTEGER <<PK>>
+  --
+  * proguser_name : VARCHAR(50) <<AK1>>
+}
+
+entity progusercredential {
+  Пароли пользователя
+  --
+  * progusercredential_id : INTEGER <<PK>>
+  --
+  * progusercredential_password : VARCHAR(128)
+  * proguser_id : INTEGER
+  * progusercredential_type : INTEGER
+  *	progusercredential_lockflag : INTEGER
+  *	progusercredential_tempflag : INTEGER
+}
+proguser --o{ progusercredential : C
+
+entity application {
+  Приложение
+  --
+  * application_id : INTEGER <<PK>>
+  --
+  * application_type : INTEGER
+    application_code : INTEGER
+  * application_name : VARCHAR(50)
+  * application_exe : VARCHAR(255)
+  	application_blob : BYTEA
+  	application_desc : VARCHAR(255)
+}
+
+entity accessrole {
+  Роль
+  --
+  * accessrole_id : INTEGER <<PK>>
+  --
+  * accessrole_name : VARCHAR(30)
+  * accessrole_note : VARCHAR(255)
+  * accessrole_visible : INTEGER
+}
+
+entity applicationrole {
+  Приложения роли
+  --
+  * applicationrole_id : INTEGER <<PK>>
+  --
+  * accessrole_id : INTEGER <<AK1>>
+  * application_id : INTEGER <<AK1>>
+}
+accessrole --o{ applicationrole : C
+application --o{ applicationrole : C
+
+entity proguserrole {
+  Доступ пользователю на роль
+  --
+  * proguserrole_id : INTEGER <<PK>>
+  --
+  * proguser_id : INTEGER <<AK1>>
+  * accessrole_id : INTEGER <<AK1>>
+}
+proguser --o{ proguserrole : C
+accessrole --o{ proguserrole : C
+
+entity controlobject {
+  Контролируемый объект - УРЛ
+  --
+  * controlobject_id : INTEGER <<PK>>
+  --
+  * controlobject_name : VARCHAR(128)
+  * controlobject_url : VARCHAR(255)
+}
+
+entity sqlaction {
+  Действие
+  --
+  * sqlaction_id : INTEGER <<PK>>
+  --
+  * sqlaction_sql : VARCHAR(18)
+    sqlaction_note : VARCHAR(20)
+}
+
+entity controlobjectrole {
+  Доступ пользователю на роль
+  --
+  * controlobjectrole_id : INTEGER <<PK>>
+  --
+  * controlobject_id : INTEGER <<AK1>>
+  * accessrole_id : INTEGER <<AK1>>
+  * sqlaction_id : INTEGER <<AK1>>
+}
+controlobject --o{ controlobjectrole : C
+accessrole --o{ controlobjectrole : C
+sqlaction --o{ controlobjectrole : R
+
+@enduml

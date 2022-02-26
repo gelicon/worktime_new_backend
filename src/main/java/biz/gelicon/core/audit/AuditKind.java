@@ -1,0 +1,15 @@
+package biz.gelicon.core.audit;
+
+public enum AuditKind {
+    UNTYPED,
+    SECURITY_SYSTEM,
+    CALL_FOR_EDIT,
+    CALL_FOR_ADD,
+    CALL_FOR_SAVE_INSERT,
+    CALL_FOR_SAVE_UPDATE,
+    CALL_FOR_DELETE,
+    PREPARE_REPORT,
+    DOWNLOAD_REPORT,
+    RUN_ARTIFACT,
+    CALL_FOR_CHANGE_STATUS
+}

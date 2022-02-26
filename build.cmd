@@ -1,0 +1,1 @@
+call C:\Java\maven\bin\mvn clean package

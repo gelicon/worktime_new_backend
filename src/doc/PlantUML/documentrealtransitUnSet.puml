@@ -1,0 +1,29 @@
+@startuml
+'https://plantuml.com/activity-diagram-beta
+
+start
+:Снятие статуса документа;
+:DocumentRealTransitService.unSetOne;
+if (Проверка возможности модификации статуса документа
+        documentrealRepository.checkStatusUpdate) then
+  :error;
+  stop
+endif
+if (     Флаг истории у статуса
+DocumentTransitFlaghistory == 1) then (Установлен)
+  :      Добавляем новую запись
+  documentRealTransitRepository.insert
+  flag = 1;
+  stop
+else (no)
+  :Ищем последний установленный статус
+  getLastDocumentRealTransitId;
+endif
+:Удаляем его
+documentRealTransitRepository.delete;
+
+:Установка текущего состояния документа
+documentreal_status - из последнего установленного;
+stop
+
+@enduml

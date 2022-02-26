@@ -1,0 +1,7 @@
+/target
+/.idea
+/.gradle
+/.mvn
+/dev
+build.sh
+/mongo/data-audit/

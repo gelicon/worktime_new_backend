@@ -1,0 +1,76 @@
+@startuml
+page 2x2
+' Скрыть круг перед названием entity
+hide circle
+
+' Ломанные линии соединения
+skinparam linetype ortho
+
+title Gelicon Issue Tracking System
+
+' Клиент. Здесь везде report_id - ссылка на worktome
+entity client {
+  * client_id : INTEGER <<PK>>
+  --
+  client_code : VARCHAR(10)
+  * client_name : VARCHAR(50) <<AK1>>
+  * client_status : INTEGER
+  * client_report_id : INTEGER
+}
+note bottom of client : Клиент
+note left of client::client_report_id
+  Это поле
+  синхронизации
+  с ГИТС
+end note
+
+entity projectaccounttype {
+  * projectaccounttype_id : INTEGER
+  --
+  * projectaccounttype_name: VARCHAR(50) <<AK1>>
+}
+
+entity department {
+  * department_id : INTEGER
+  --
+    department_code : VARCHAR(15)
+  * department_name : VARCHAR(250)
+  * department_status : INTEGER
+  * department_report_id : INTEGER
+}
+
+entity worker {
+  * worker_id : INTEGER
+  --
+  * department_id : INTEGER <<FK>>
+  * WORKER_FAMILY : VARCHAR(30)
+  * WORKER_SHORTNAME : VARCHAR(30)
+    WORKER_SURNAME : VARCHAR(30)
+	* worker_position : CHAR(50)
+	  worker_email : CHAR(50)
+	* worker_status : INTEGER
+	* worker_report_id : INTEGER
+	* worker_familyname : CHAR(30)
+	* worker_firstname : CHAR(30)
+	  worker_phone : VARCHAR(30)
+}
+department --o{ worker : работники работают в отелах
+
+entity projectaccount {
+  * projectaccount_id : INTEGER <<PK>>
+  --
+  * client_id : INTEGER <<PK>>
+  * projectaccounttype_id : INTEGER
+  * projectaccount_name : VARCHAR(50) <<AK1>>
+  * projectaccount_status : INTEGER
+  * projectaccount_report_id : INTEGER
+    projectaccount_code : VARCHAR(128)
+  * worker_id : INTEGER
+}
+client--o{ projectaccount
+projectaccounttype--o{ projectaccount
+worker--o{ projectaccount
+
+
+
+@enduml

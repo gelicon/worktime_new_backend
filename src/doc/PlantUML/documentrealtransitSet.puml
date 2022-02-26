@@ -1,0 +1,30 @@
+@startuml
+'https://plantuml.com/activity-diagram-beta
+
+start
+:Установка статуса документа;
+:DocumentRealTransitService.setOne;
+if (Проверка принадлежности статуса типу документу
+    document_id из documentreal должны быть равен
+    document_id из documenttransit) then
+  :error;
+  stop
+endif
+if (Проверка возможности модификации статуса документа
+        documentrealRepository.checkStatusUpdate) then
+  :error;
+  stop
+endif
+if (Проверка повторной установки статуса) then
+  :error;
+  stop
+endif
+if (Проверка доступа пользователю на установку статуса) then
+  :error;
+  stop
+endif
+:Установка текущего состояния документа
+documentreal_status - из последнего установленного;
+stop
+
+@enduml

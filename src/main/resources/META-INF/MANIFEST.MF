@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Main-Class: biz.gelicon.core.MainApplication
+Class-Path: lib/reports.jar
+
