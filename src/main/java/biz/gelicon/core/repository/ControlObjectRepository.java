@@ -1,5 +1,6 @@
 package biz.gelicon.core.repository;
 
+import biz.gelicon.core.config.Config;
 import biz.gelicon.core.model.ControlObject;
 import biz.gelicon.core.security.Permission;
 import biz.gelicon.core.utils.DatabaseUtils;
@@ -106,24 +107,25 @@ public class ControlObjectRepository implements TableRepository<ControlObject> {
 
     @Override
     public int load() {
+        String v1 = "/v" + Config.CURRENT_VERSION + "/";
         ControlObject[] data = new ControlObject[]{
                 new ControlObject(1, "Просмотр списка единиц измерения",
-                        "/v1/apps/refbooks/edizm/edizm/getlist"),
+                        v1 + "apps/refbooks/edizm/edizm/getlist"),
                 new ControlObject(2,
                         "Получение единицы измерения с целью редактирования/добавления",
-                        "/v1/apps/refbooks/edizm/edizm/get"),
+                        v1 + "apps/refbooks/edizm/edizm/get"),
                 new ControlObject(3, "Сохранение единицы измерения",
-                        "/v1/apps/refbooks/edizm/edizm/save"),
+                        v1 + "apps/refbooks/edizm/edizm/save"),
                 new ControlObject(4, "Удаление единицы измерения",
-                        "/v1/apps/refbooks/edizm/edizm/delete"),
+                        v1 + "apps/refbooks/edizm/edizm/delete"),
                 new ControlObject(5, "Получение единицы измерения с целью редактирования",
-                        "/v1/apps/refbooks/edizm/edizm/get#edit"),
+                        v1 + "apps/refbooks/edizm/edizm/get#edit"),
                 new ControlObject(6, "Получение единицы измерения с целью добавления",
-                        "/v1/apps/refbooks/edizm/edizm/get#add"),
+                        v1 + "apps/refbooks/edizm/edizm/get#add"),
                 new ControlObject(7, "Сохранение новой единицы измерения",
-                        "/v1/apps/refbooks/edizm/edizm/save#ins"),
+                        v1 + "apps/refbooks/edizm/edizm/save#ins"),
                 new ControlObject(8, "Обновление единицы измерения",
-                        "/v1/apps/refbooks/edizm/edizm/save#upd"),
+                        v1 + "apps/refbooks/edizm/edizm/save#upd"),
         };
         insert(Arrays.asList(data));
         logger.info(String.format("%d controlobject loaded", data.length));

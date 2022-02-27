@@ -92,16 +92,21 @@ public class AccessRoleRepository implements TableRepository<AccessRole> {
     /**
      * Связывает контролируемый объект с ролью
      *
-     * @param accessRoleId
-     * @param controlObjectId
-     * @param permission
      */
     public void bindWithControlObject(Integer accessRoleId, Integer controlObjectId,
             Permission permission) {
-        String sqlText =
-                "INSERT INTO controlobjectrole (controlobjectrole_id,controlobject_id,accessrole_id,sqlaction_id) "
-                        +
-                        "VALUES (:id,:controlobject_id,:accessrole_id,:sqlaction_id)";
+        String sqlText = " "
+                + " INSERT INTO controlobjectrole ("
+                + "   controlobjectrole_id,"
+                + "   controlobject_id,"
+                + "   accessrole_id,"
+                + "   sqlaction_id) "
+                + " VALUES ("
+                + "   :id,"
+                + "   :controlobject_id,"
+                + "   :accessrole_id,"
+                + "   :sqlaction_id"
+                + ")";
         Map<String, Object> map = new HashMap<>();
         map.put("id", DatabaseUtils.sequenceNextValue("controlobjectrole_id_gen"));
         map.put("controlobject_id", controlObjectId);
@@ -113,8 +118,6 @@ public class AccessRoleRepository implements TableRepository<AccessRole> {
     /**
      * Разрушает связь контролируемого объекта с ролью
      *
-     * @param accessRoleId
-     * @param controlObjectId
      */
     public void unbindControlObject(Integer accessRoleId, Integer controlObjectId) {
         String sqlText =
@@ -162,7 +165,7 @@ public class AccessRoleRepository implements TableRepository<AccessRole> {
         logger.info(String.format("%d accessrole loaded", data.length));
         DatabaseUtils.setSequence("accessrole_id_gen", data.length + 1);
 
-        // Пользователь root всегда связан с ролью SYSDBA
+        // Пользователь SYSDBA всегда связан с ролью SYSDBA
         bindWithProgUser(0, 1);
 
         // Пользователь test1 связан с ролью TEST1
