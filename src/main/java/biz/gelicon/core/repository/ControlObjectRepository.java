@@ -107,6 +107,8 @@ public class ControlObjectRepository implements TableRepository<ControlObject> {
 
     @Override
     public int load() {
+        // todo
+        /*
         String v1 = "/v" + Config.CURRENT_VERSION + "/";
         ControlObject[] data = new ControlObject[]{
                 new ControlObject(1, "Просмотр списка единиц измерения",
@@ -131,6 +133,9 @@ public class ControlObjectRepository implements TableRepository<ControlObject> {
         logger.info(String.format("%d controlobject loaded", data.length));
         DatabaseUtils.setSequence("controlobject_id_gen", data.length + 1);
         return data.length;
+
+         */
+        return 0;
     }
 
 

@@ -24,15 +24,26 @@ public class AccessRoleRepository implements TableRepository<AccessRole> {
 
 
     public List<AccessRole> findByUser(Integer progUserId) {
-        return findQuery(""
-                        + " SELECT DISTINCT"
-                        + "        AR.* "
-                        + " FROM   accessrole AR "
-                        + "        INNER JOIN proguserrole PGR ON PGR.accessrole_id = AR.accessrole_id "
-                        + " WHERE  AR.accessrole_visible! = 0 "
-                        + "   AND  (PGR.proguser_id = :proguser_id OR :proguser_id = 0)",
-                // dav SYSDBA имеет доступ на все роли
-                "proguser_id", progUserId);
+        List<AccessRole> accessRoleList;
+        if (progUserId == 1) {
+            // dav SYSDBA имеет доступ на все роли
+            accessRoleList = findQuery(""
+                    + " SELECT DISTINCT"
+                    + "        AR.* "
+                    + " FROM   accessrole AR "
+                    + " WHERE  AR.accessrole_visible != 0 ");
+        } else {
+            accessRoleList = findQuery(""
+                            + " SELECT DISTINCT"
+                            + "        AR.* "
+                            + " FROM   accessrole AR "
+                            + "        INNER JOIN proguserrole PGR "
+                            + "          ON PGR.accessrole_id = AR.accessrole_id "
+                            + " WHERE  AR.accessrole_visible != 0 "
+                            + "   AND  (PGR.proguser_id = :proguser_id)",
+                    "proguser_id", progUserId);
+        }
+        return accessRoleList;
     }
 
     public List<ObjectRoleView> findAllObjectRoles() {
@@ -140,39 +151,26 @@ public class AccessRoleRepository implements TableRepository<AccessRole> {
     }
 
     @Override
-    public void dropForTest() {
-        String[] dropTableBefore = new String[]{
-        };
-        TableRepository.super.drop(dropTableBefore);
-
-        TableRepository.super.dropForTest();
-
-        String[] dropTableAfter = new String[]{
-        };
-        TableRepository.super.drop(dropTableAfter);
-    }
-
-    @Override
     public int load() {
         AccessRole[] data = new AccessRole[]{
-                new AccessRole(0, "SYSDBA", "Системный администратор", 1),
-                new AccessRole(1, "TEST1", "Директор", 1),
-                new AccessRole(2, "TEST2", "Зам.директора", 1),
-                new AccessRole(3, "TEST3", "Помошник директора", 0),
-                new AccessRole(4, "TEST4", "Бухгалтер", 1),
+                new AccessRole(1, "SYSDBA", "Полный доступ на все", 1),
+                new AccessRole(2, "ADMIN", "Администрирование", 1),
+                new AccessRole(3, "EDIZM", "Единицы измерения", 1),
         };
         insert(Arrays.asList(data));
         logger.info(String.format("%d accessrole loaded", data.length));
         DatabaseUtils.setSequence("accessrole_id_gen", data.length + 1);
 
         // Пользователь SYSDBA всегда связан с ролью SYSDBA
-        bindWithProgUser(0, 1);
+        bindWithProgUser(1, 1);
 
-        // Пользователь test1 связан с ролью TEST1
-        bindWithProgUser(1, 2);
-        // Пользователь test3 связан с ролью TEST2
-        bindWithProgUser(2, 4);
+        // Пользователь ADMIN связан с ролью ADMIN
+        bindWithProgUser(2, 2);
+        // Пользователь USER1 связан с ролью EDIZM
+        bindWithProgUser(3, 3);
 
+        // todo - сделать
+        /*
         //Роль TEST1 связана с всеми функциями edizm, кроме удаления
         bindWithControlObject(1, 1, Permission.EXECUTE);
         bindWithControlObject(1, 2, Permission.EXECUTE);
@@ -183,6 +181,7 @@ public class AccessRoleRepository implements TableRepository<AccessRole> {
         // это delete - свяжем с другими ролями
         bindWithControlObject(2, 4, Permission.EXECUTE);
         bindWithControlObject(4, 4, Permission.EXECUTE);
+         */
 
         return data.length;
     }

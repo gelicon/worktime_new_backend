@@ -1,7 +1,6 @@
 package biz.gelicon.core.controllers;
 
 import biz.gelicon.core.annotations.Audit;
-import biz.gelicon.core.annotations.CheckAdminPermission;
 import biz.gelicon.core.audit.AuditKind;
 import biz.gelicon.core.config.Config;
 import biz.gelicon.core.dto.AllowOrDenyControlObject;
@@ -62,7 +61,6 @@ public class ControlObjectController {
 
     @Operation(summary = ConstantForControllers.GETLIST_OPERATION_SUMMARY,
             description = ConstantForControllers.GETLIST_OPERATION_DESCRIPTION)
-    @CheckAdminPermission
     @RequestMapping(value = "controlobject/getlist", method = RequestMethod.POST)
     public DataResponse<ControlObjectView> getlist(@RequestBody GridDataOptionControlObject gridDataOption) {
         boolean accessroleFound = gridDataOption.getNamedFilters().stream().anyMatch(nf -> "accessRoleId".equals(nf.getName()));
@@ -78,7 +76,6 @@ public class ControlObjectController {
 
     @Operation(summary = ConstantForControllers.GET_OPERATION_SUMMARY,
             description = ConstantForControllers.GET_OPERATION_DESCRIPTION)
-    @CheckAdminPermission
     @RequestMapping(value = "controlobject/get", method = RequestMethod.POST)
     @Audit(kinds={AuditKind.CALL_FOR_EDIT,AuditKind.CALL_FOR_ADD})
     public ControlObjectDTO get(@RequestBody(required = false) Integer id) {
@@ -95,7 +92,6 @@ public class ControlObjectController {
 
     @Operation(summary = ConstantForControllers.SAVE_OPERATION_SUMMARY,
             description = ConstantForControllers.SAVE_OPERATION_DESCRIPTION)
-    @CheckAdminPermission
     @RequestMapping(value = "controlobject/save", method = RequestMethod.POST)
     @Audit(kinds={AuditKind.CALL_FOR_SAVE_UPDATE,AuditKind.CALL_FOR_SAVE_INSERT})
     public ControlObjectView save(@RequestBody ControlObjectDTO controlObjectDTO) {
@@ -114,7 +110,6 @@ public class ControlObjectController {
 
     @Operation(summary = ConstantForControllers.DELETE_OPERATION_SUMMARY,
             description = ConstantForControllers.DELETE_OPERATION_DESCRIPTION)
-    @CheckAdminPermission
     @RequestMapping(value = "controlobject/delete", method = RequestMethod.POST)
     @Audit(kinds={AuditKind.CALL_FOR_DELETE})
     public String delete(@RequestBody int[] ids) {
@@ -124,7 +119,6 @@ public class ControlObjectController {
 
     @Operation(summary = "Дать доступ на контролируемые объекты для роли",
             description = "Дать доступ на контролируемые объекты, чьи идентификаторы переданы, для роли, чей идентификатор также передан.")
-    @CheckAdminPermission
     @RequestMapping(value = "controlobject/allow", method = RequestMethod.POST)
     @ResponseBody
     @Audit(kinds={AuditKind.SECURITY_SYSTEM})
@@ -137,7 +131,6 @@ public class ControlObjectController {
 
     @Operation(summary = "Отнять доступ на контролируемые объекты у роли",
             description = "Отнять доступ на контролируемые объекты, чьи идентификаторы переданы, у роли, чей идентификатор также передан.")
-    @CheckAdminPermission
     @RequestMapping(value = "controlobject/deny", method = RequestMethod.POST)
     @ResponseBody
     @Audit(kinds={AuditKind.SECURITY_SYSTEM})

@@ -1,7 +1,6 @@
 package biz.gelicon.core.controllers;
 
 import biz.gelicon.core.annotations.Audit;
-import biz.gelicon.core.annotations.CheckAdminPermission;
 import biz.gelicon.core.audit.AuditKind;
 import biz.gelicon.core.config.Config;
 import biz.gelicon.core.jobs.JobDispatcher;
@@ -66,7 +65,6 @@ public class SessionController {
 
     @Operation(summary = ConstantForControllers.GETLIST_OPERATION_SUMMARY,
             description = ConstantForControllers.GETLIST_OPERATION_DESCRIPTION)
-    @CheckAdminPermission
     @RequestMapping(value = "session/getlist", method = RequestMethod.POST)
     public DataResponse<ProguserAuthView> getlist(@RequestBody GridDataOptionSession gridDataOption) {
         boolean statusFound = gridDataOption.getNamedFilters().stream().anyMatch(nf -> "status".equals(nf.getName()));
@@ -87,7 +85,6 @@ public class SessionController {
 
     @Operation(summary = "Закрытие сессий",
             description = "Закрытие сессий с текущего момента")
-    @CheckAdminPermission
     @RequestMapping(value = "session/close", method = RequestMethod.POST)
     @Audit(kinds= AuditKind.CALL_FOR_DELETE)
     public String close(@RequestBody int[] ids, @RequestHeader(name="Authorization") String token) {

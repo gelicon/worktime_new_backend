@@ -1,7 +1,6 @@
 package biz.gelicon.core.controllers;
 
 import biz.gelicon.core.annotations.Audit;
-import biz.gelicon.core.annotations.CheckAdminPermission;
 import biz.gelicon.core.annotations.CheckPermission;
 import biz.gelicon.core.audit.AuditKind;
 import biz.gelicon.core.config.Config;
@@ -77,7 +76,6 @@ public class ApplicationRoleController {
 
     @Operation(summary = "Дать доступ на объект \"Доступ к модулям\" для роли",
             description = "Дать доступ на объект \"Доступ к модулям\", чьи идентификаторы переданы, для роли, чей идентификатор также передан.")
-    @CheckAdminPermission
     @RequestMapping(value = "applicationrole/allow", method = RequestMethod.POST)
     @ResponseBody
     @Audit(kinds={AuditKind.SECURITY_SYSTEM})
@@ -88,7 +86,6 @@ public class ApplicationRoleController {
 
     @Operation(summary = "Отнять доступ на объект \"Доступ к модулям\" у роли",
             description = "Отнять доступ на объект \"Доступ к модулям\", чьи идентификаторы переданы, у роли, чей идентификатор также передан.")
-    @CheckAdminPermission
     @RequestMapping(value = "applicationrole/deny", method = RequestMethod.POST)
     @ResponseBody
     @Audit(kinds={AuditKind.SECURITY_SYSTEM})

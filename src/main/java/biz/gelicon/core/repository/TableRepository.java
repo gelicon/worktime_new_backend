@@ -143,6 +143,9 @@ public interface TableRepository<T> {
         return buildInsertClause(tableName,Arrays.asList(columnNames),Arrays.asList(params));
     }
 
+    /**
+     * Состааляет текст SQL-оператора INSERT по колонками и параметрам
+     */
     default String buildInsertClause(String tableName, List<String> columnNames,List<String> params) {
         return "INSERT INTO " + tableName +
                 columnNames.stream()

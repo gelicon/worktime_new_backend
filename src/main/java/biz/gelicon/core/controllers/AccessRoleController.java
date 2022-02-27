@@ -1,7 +1,6 @@
 package biz.gelicon.core.controllers;
 
 import biz.gelicon.core.annotations.Audit;
-import biz.gelicon.core.annotations.CheckAdminPermission;
 import biz.gelicon.core.audit.AuditKind;
 import biz.gelicon.core.config.Config;
 import biz.gelicon.core.dto.AccessRoleDTO;
@@ -62,7 +61,6 @@ public class AccessRoleController {
 
     @Operation(summary = ConstantForControllers.GETLIST_OPERATION_SUMMARY,
             description = ConstantForControllers.GETLIST_OPERATION_DESCRIPTION)
-    @CheckAdminPermission
     @RequestMapping(value = "accessrole/getlist", method = RequestMethod.POST)
     public DataResponse<AccessRoleView> getlist(
             @RequestBody GridDataOptionAccessRole gridDataOption) {
@@ -99,7 +97,6 @@ public class AccessRoleController {
 
     @Operation(summary = ConstantForControllers.GET_OPERATION_SUMMARY,
             description = ConstantForControllers.GET_OPERATION_DESCRIPTION)
-    @CheckAdminPermission
     @RequestMapping(value = "accessrole/get", method = RequestMethod.POST)
     @Audit(kinds = {AuditKind.CALL_FOR_EDIT, AuditKind.CALL_FOR_ADD})
     public AccessRoleDTO get(@RequestBody(required = false) Integer id) {
@@ -120,7 +117,6 @@ public class AccessRoleController {
 
     @Operation(summary = ConstantForControllers.SAVE_OPERATION_SUMMARY,
             description = ConstantForControllers.SAVE_OPERATION_DESCRIPTION)
-    @CheckAdminPermission
     @RequestMapping(value = "accessrole/save", method = RequestMethod.POST)
     @Audit(kinds = {AuditKind.CALL_FOR_SAVE_INSERT, AuditKind.CALL_FOR_SAVE_UPDATE})
     public AccessRoleView save(@RequestBody AccessRoleDTO accessRoleDTO) {
@@ -139,7 +135,6 @@ public class AccessRoleController {
 
     @Operation(summary = ConstantForControllers.DELETE_OPERATION_SUMMARY,
             description = ConstantForControllers.DELETE_OPERATION_DESCRIPTION)
-    @CheckAdminPermission
     @RequestMapping(value = "accessrole/delete", method = RequestMethod.POST)
     @Audit(kinds = {AuditKind.CALL_FOR_DELETE})
     public String delete(@RequestBody int[] ids) {

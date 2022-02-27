@@ -101,7 +101,7 @@ public class ProgUserAuthRepository implements TableRepository<ProguserAuth>   {
         ProguserAuth[] data =  new ProguserAuth[] {
                 new ProguserAuth(1,1,new Date(),"e9b3c034-fdd5-456f-825b-4c632f2053ac"),
                 new ProguserAuth(2,2,new Date(), oldDate,"62e4e435-85da-48a4-adb0-d91ff1d26624"),// устаревший
-                new ProguserAuth(3,4,new Date(), oldDate,"12121212-8888-48a4-adb2-d91ff1d27899"),// устаревший, но юзер живой
+      //          new ProguserAuth(3,4,new Date(), oldDate,"12121212-8888-48a4-adb2-d91ff1d27899"),// устаревший, но юзер живой
                 new ProguserAuth(4,3,new Date(), "11111111-1111-1111-1111-111111111111"),// у заблокированного
                 new ProguserAuth(5,2,new Date(), "22222222-85da-48a4-2222-d91ff1d26624"),// живой токен для test1
         };
