@@ -14,6 +14,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -108,23 +109,32 @@ public class ApplicationRepository implements TableRepository<Application> {
     public int load() {
         Application[] data = new Application[]{
                 new Application(1, Application.TYPE_GELICON_CORE_APP,
-                        "s1.m0.sm1", "Справочник единиц измерения", "edizm", "edizm"),
+                        "admin.credential.progusergroup", "Группы пользователей", "credential", null),
                 new Application(2, Application.TYPE_GELICON_CORE_APP,
-                        "s4.m0.sm1", "Пользователи", "credential", null),
+                        "admin.credential.application", "Приложения", "credential", null),
                 new Application(3, Application.TYPE_GELICON_CORE_APP,
-                        "s4.m0.sm2", "Роли", "credential", null),
+                        "admin.credential.accessrole", "Роли доступа", "credential", null),
                 new Application(4, Application.TYPE_GELICON_CORE_APP,
-                        "s4.m0.sm3", "Права", "credential", null),
+                        "admin.credential.proguser", "Пользователи", "credential", null),
+                new Application(5, Application.TYPE_GELICON_CORE_APP,
+                        "admin.credential.applicationrole", "Доступ роли на приложение",
+                        "credential", null),
+                new Application(6, Application.TYPE_GELICON_CORE_APP,
+                        "admin.credential.controlobjectrole",
+                        "Доступ роли на контролируемый объект", "credential", null),
+                new Application(7, Application.TYPE_GELICON_CORE_APP,
+                        "admin.credential.proguserrole", "Доступ пользователю на роль",
+                        "credential", null),
+                new Application(8, Application.TYPE_GELICON_CORE_APP,
+                        "admin.audit.session", "Сессии", "audit", null),
+                new Application(100, Application.TYPE_GELICON_CORE_APP,
+                        "refbooks.edizm.edizm", "Справочник единиц измерения", "edizm", "edizm"),
         };
         insert(Arrays.asList(data));
-        DatabaseUtils.setSequence("application_id_gen", data.length + 1);
-        /* dav
-        У SYSDBA и так доступ на все
-        allow(0, data[0].getApplicationId());
-        allow(0, data[1].getApplicationId());
-        allow(0, data[2].getApplicationId());
-        allow(0, data[3].getApplicationId());
-         */
+        int i = Collections.max(
+                Arrays.stream(data).map(p -> p.applicationId).collect(Collectors.toList())
+        );
+        DatabaseUtils.setSequence("application_id_gen", i);
 
         logger.info(String.format("%d application loaded", data.length));
         return data.length;

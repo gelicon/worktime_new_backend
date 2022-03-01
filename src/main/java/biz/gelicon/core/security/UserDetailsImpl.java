@@ -60,7 +60,7 @@ public class UserDetailsImpl implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return pu.getStatusId()== CapCode.USER_IS_ACTIVE;
+        return pu.getStatusId() == Proguser.USER_IS_ACTIVE;
     }
 
     @Override

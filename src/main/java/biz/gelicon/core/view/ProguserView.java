@@ -2,108 +2,119 @@ package biz.gelicon.core.view;
 
 import biz.gelicon.core.model.Proguser;
 import io.swagger.v3.oas.annotations.media.Schema;
-import javax.persistence.Column;
 
-/* Объект сгенерирован 27.04.2021 09:20 */
-@Schema(description = "Представление объекта \"Пользователь\"")
+import javax.persistence.Column;
+import javax.persistence.Id;
+
+@Schema(description = "Представление пользователя")
 public class ProguserView {
 
-    @Schema(description = "Идентификатор \"Пользователь\"")
+    @Schema(description = "Идентификатор")
+    @Id
     @Column(name="proguser_id")
-    public Integer proguserId;
+    private Integer proguserId;
 
     @Schema(description = "Идентификатор статуса")
-    @Column(name="proguser_status_id")
+    @Column(name = "proguser_status_id")
     private Integer statusId;
 
-    @Schema(description = "Статус")
-    @Column(name="proguser_status_display",table = "capcode")
-    private String statusDisplay;
+    @Schema(description = "Наименование статуса")
+    private String proguserStatusName;
+
+    @Schema(description = "Тип")
+    @Column(name = "proguser_type")
+    private Integer proguserType;
+
+    @Schema(description = "Наименование типа")
+    @Column(name = "proguser_type__name")
+    private String proguserTypeName;
 
     @Schema(description = "Имя")
-    @Column(name="proguser_name")
+    @Column(name = "proguser_name")
     private String proguserName;
 
     @Schema(description = "Полное имя")
-    @Column(name="proguser_fullname")
-    private String proguserFullname;
+    @Column(name = "proguser_fullname")
+    private String proguserFullName;
 
-    @Schema(description = "Адрес электронной почты")
-    @Column(name="proguserchannel_address",table = "proguserchannel")
-    private String proguserchannelAddress;
-
-
-
-    public ProguserView() {}
-
-    public ProguserView(
-            Integer proguserId,
-            Integer progusergroupId,
-            Integer statusId,
-            Integer proguserType,
-            String proguserName,
-            String proguserFullname,
-            String progusergroupName) {
-        this.proguserId = proguserId;
-        this.statusId = statusId;
-        this.proguserName = proguserName;
-        this.proguserFullname = proguserFullname;
+    public ProguserView() {
     }
 
-    public ProguserView(Proguser entity) {
-        this.proguserId = entity.getProguserId();
-        this.statusId = entity.getStatusId();
-        this.proguserName = entity.getProguserName();
-        this.proguserFullname = entity.getProguserFullName();
+    public ProguserView(Integer proguserId,  Integer statusId,
+            Integer proguserType, String proguserTypeName, String proguserName,
+            String proguserFullName) {
+        this.proguserId = proguserId;
+        this.statusId = statusId;
+        this.proguserStatusName = this.getProguserStatusName();
+        this.proguserType = proguserType;
+        this.proguserTypeName = this.getProguserTypeName();
+        this.proguserName = proguserName;
+        this.proguserFullName = proguserFullName;
+    }
+
+    public ProguserView(Proguser proguser) {
+        this.proguserId = proguser.getProguserId();
+        this.statusId = proguser.getStatusId();
+        this.proguserStatusName = this.getProguserStatusName();
+        this.proguserType = proguser.getProguserType();
+        this.proguserTypeName = this.getProguserTypeName();
+        this.proguserName = proguser.getProguserName();
+        this.proguserFullName = proguser.getProguserFullName();
+    }
+
+    public void setProguserId(Integer proguserId) {
+        this.proguserId = proguserId;
+    }
+
+    public void setStatusId(Integer statusId) {
+        this.statusId = statusId;
+    }
+
+    public void setProguserStatusName(String proguserStatusName) {
+        this.proguserStatusName = proguserStatusName;
+    }
+
+    public void setProguserType(Integer proguserType) {
+        this.proguserType = proguserType;
+    }
+
+    public void setProguserTypeName(String proguserTypeName) {
+        this.proguserTypeName = proguserTypeName;
+    }
+
+    public void setProguserName(String proguserName) {
+        this.proguserName = proguserName;
+    }
+
+    public void setProguserFullName(String proguserFullName) {
+        this.proguserFullName = proguserFullName;
     }
 
     public Integer getProguserId() {
         return proguserId;
     }
 
-    public void setProguserId(Integer value) {
-        this.proguserId = value;
-    }
-
     public Integer getStatusId() {
         return statusId;
     }
 
-    public void setStatusId(Integer value) {
-        this.statusId = value;
+    public String getProguserStatusName() {
+        return statusId == Proguser.USER_IS_ACTIVE ? "Активный" : "Заблокированный";
     }
 
+    public Integer getProguserType() {
+        return proguserType;
+    }
+
+    public String getProguserTypeName() {
+        return proguserType == 1 ? "Администратор" : "Обычный";
+    }
 
     public String getProguserName() {
         return proguserName;
     }
 
-    public void setProguserName(String value) {
-        this.proguserName = value;
-    }
-
-    public String getProguserFullname() {
-        return proguserFullname;
-    }
-
-    public void setProguserFullname(String value) {
-        this.proguserFullname = value;
-    }
-
-    public String getProguserchannelAddress() {
-        return proguserchannelAddress;
-    }
-
-    public void setProguserchannelAddress(String proguserchannelAddress) {
-        this.proguserchannelAddress = proguserchannelAddress;
-    }
-
-    public String getStatusDisplay() {
-        return statusDisplay;
-    }
-
-    public void setStatusDisplay(String statusDisplay) {
-        this.statusDisplay = statusDisplay;
+    public String getProguserFullName() {
+        return proguserFullName;
     }
 }
-

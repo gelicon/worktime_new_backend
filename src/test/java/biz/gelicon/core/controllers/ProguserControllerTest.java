@@ -2,11 +2,10 @@ package biz.gelicon.core.controllers;
 
 import biz.gelicon.core.dto.NewProgUserPasswordDTO;
 import biz.gelicon.core.dto.PasswordDTO;
-import biz.gelicon.core.dto.ProguserDTO;
 import biz.gelicon.core.dto.ProguserRoleDTO;
 import biz.gelicon.core.model.CapCode;
+import biz.gelicon.core.model.Proguser;
 import biz.gelicon.core.model.Progusergroup;
-import biz.gelicon.core.view.ProguserView;
 import biz.gelicon.core.utils.GridDataOption;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeAll;
@@ -22,7 +21,6 @@ import java.util.Arrays;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -128,13 +126,12 @@ public class ProguserControllerTest extends IntergatedTest {
                 .andExpect(content().string(not(containsString("\"errorMessage\":"))))
                 .andReturn();
         String content = result.getResponse().getContentAsString();
-        ProguserDTO dto = new ObjectMapper().readValue(content,ProguserDTO.class);
+        Proguser dto = new ObjectMapper().readValue(content,Proguser.class);
 
         // проверка сохранения изменений
         String checkValue = "---";
         String fldName = "proguserName";
         dto.setProguserName(checkValue);
-        dto.setProguserchannelAddress("puc@mail.ru");
 
         this.mockMvc.perform(post(buildUrl("proguser/save",CONTOURE,MODULE))
                 .content(new ObjectMapper().writeValueAsString(dto))
@@ -164,7 +161,7 @@ public class ProguserControllerTest extends IntergatedTest {
                 .andExpect(content().string(not(containsString("\"errorMessage\":"))))
                 .andReturn();
         String content = result.getResponse().getContentAsString();
-        ProguserDTO dto = new ObjectMapper().readValue(content,ProguserDTO.class);
+        Proguser dto = new ObjectMapper().readValue(content,Proguser.class);
 
         // проверка сохранения c ошибками
         this.mockMvc.perform(post(buildUrl("proguser/save",CONTOURE,MODULE))
@@ -177,11 +174,10 @@ public class ProguserControllerTest extends IntergatedTest {
         // проверка сохранения без ошибкок
 
         String checkValue = "xyxyxyx";
-        dto.setProguserFullname("этояэтояэтоя");
-        dto.setStatusId(CapCode.USER_IS_ACTIVE);
+        dto.setProguserFullName("этояэтояэтоя");
+        dto.setStatusId(Proguser.USER_IS_ACTIVE);
         String fldName = "proguserName";
         dto.setProguserName(checkValue);
-        dto.setProguserchannelAddress("puc@mail.ru");
 
 
         result = this.mockMvc.perform(post(buildUrl("proguser/save",CONTOURE,MODULE))
@@ -192,7 +188,7 @@ public class ProguserControllerTest extends IntergatedTest {
                 .andExpect(content().string(containsString(String.format("\"%s\":\"%s\"",fldName,checkValue))))
                 .andReturn();
         content = result.getResponse().getContentAsString();
-        ProguserView view = new ObjectMapper().readValue(content,ProguserView.class);
+        Proguser view = new ObjectMapper().readValue(content,Proguser.class);
 
         //удаление записи
         this.mockMvc.perform(post(buildUrl("proguser/delete",CONTOURE,MODULE))
@@ -236,46 +232,6 @@ public class ProguserControllerTest extends IntergatedTest {
     }
 
 
-    @Test
-    @Transactional
-    @Rollback
-    public void getAndSetRoles() throws Exception {
-        ProguserController.ProguserRequest req = new ProguserController.ProguserRequest(4);
-
-        this.mockMvc.perform(post(buildUrl("/proguser/roles/getlist",CONTOURE,MODULE))
-                .content(new ObjectMapper().writeValueAsString(req))
-                .contentType(MediaType.APPLICATION_JSON))
-                //.andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(content().string(containsString("\"accessRoleId\":2")));
-
-
-        ProguserRoleDTO dto = new ProguserRoleDTO();
-        dto.setProguserId(4);
-        dto.setAccessRoleIds(Arrays.asList(new Integer[]{1,4}));
-
-        this.mockMvc.perform(post(buildUrl("/proguser/roles/save",CONTOURE,MODULE))
-                .content(new ObjectMapper().writeValueAsString(dto))
-                .contentType(MediaType.APPLICATION_JSON))
-                //.andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(content().string(not(containsString("\"errorCode\":"))));
-
-        this.mockMvc.perform(post(buildUrl("/proguser/roles/getlist",CONTOURE,MODULE))
-                .content(new ObjectMapper().writeValueAsString(req))
-                .contentType(MediaType.APPLICATION_JSON))
-                //.andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(content().string(containsString("\"accessRoleId\":4")));
-
-        this.mockMvc.perform(post(buildUrl("/proguser/roles/get",CONTOURE,MODULE))
-                .content("4")
-                .contentType(MediaType.APPLICATION_JSON))
-                //.andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(content().string(containsString("\"accessRoleIds\":[1,4]")));
-
-    }
 
 }
 

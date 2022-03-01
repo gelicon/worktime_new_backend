@@ -22,12 +22,6 @@ import javax.validation.constraints.Size;
 @TableDescription("Кодификатор")
 @OrderBy("capcode_sortcode")
 public class CapCode {
-    // Активный пользователь
-    public final static int USER_IS_ACTIVE = 1301;
-    // Заблокированный пользователь
-    public final static int USER_IS_BLOCKED = 1302;
-    // В архиве
-    public final static int USER_ARCHIVE = 1303;
     // Канал электронной почты
     public final static int CHANNEL_EMAIL = 9001;
     // аутентификация по паролю

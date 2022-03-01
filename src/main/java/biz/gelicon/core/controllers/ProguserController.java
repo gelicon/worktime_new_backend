@@ -5,16 +5,8 @@ import biz.gelicon.core.audit.AuditKind;
 import biz.gelicon.core.config.Config;
 import biz.gelicon.core.dto.NewProgUserPasswordDTO;
 import biz.gelicon.core.dto.PasswordDTO;
-import biz.gelicon.core.dto.ProguserDTO;
-import biz.gelicon.core.dto.ProguserRoleDTO;
-import biz.gelicon.core.dto.SelectDisplayData;
 import biz.gelicon.core.jobs.JobDispatcher;
-import biz.gelicon.core.model.AccessRole;
-import biz.gelicon.core.model.CapCode;
 import biz.gelicon.core.model.Proguser;
-import biz.gelicon.core.model.ProguserChannel;
-import biz.gelicon.core.model.Progusergroup;
-import biz.gelicon.core.repository.CapCodeRepository;
 import biz.gelicon.core.repository.ProgUserRepository;
 import biz.gelicon.core.response.DataResponse;
 import biz.gelicon.core.response.StandardResponse;
@@ -31,8 +23,6 @@ import biz.gelicon.core.service.ProguserService;
 import biz.gelicon.core.utils.ConstantForControllers;
 import biz.gelicon.core.utils.GridDataOption;
 import biz.gelicon.core.utils.QueryUtils;
-import biz.gelicon.core.view.AccessRoleView;
-import biz.gelicon.core.view.ProguserAccessRoleView;
 import biz.gelicon.core.view.ProguserView;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -52,6 +42,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -89,8 +80,6 @@ public class ProguserController {
     @Autowired()
     @Qualifier("jobACL")
     private JobDispatcher jobACLDispather;
-    @Autowired
-    private CapCodeRepository capCodeRepository;
     @Autowired
     private ProgUserRepository progUserRepository;
     @Autowired
@@ -134,30 +123,16 @@ public class ProguserController {
             description = ConstantForControllers.GET_OPERATION_DESCRIPTION)
     @RequestMapping(value = "proguser/get", method = RequestMethod.POST)
     @Audit(kinds={AuditKind.CALL_FOR_EDIT,AuditKind.CALL_FOR_ADD})
-    public ProguserDTO get(@RequestBody(required = false) Integer id) {
+    public Proguser get(@RequestBody(required = false) Integer id) {
         // для добавления
         if(id==null) {
             Proguser entity = new Proguser();
-            entity.setStatusId(CapCode.USER_IS_ACTIVE);
-            CapCode status = progUserRepository.getForeignKeyEntity(entity,CapCode.class);
-            ProguserDTO dto = new ProguserDTO(entity);
-            dto.setStatusDisplay(status.getCapCodeName());
-            return dto;
+            return entity;
         } else {
             Proguser entity = proguserService.findById(id);
             if(entity==null)
-                throw new NotFoundException(String.format("Запись с идентификатором %s не найдена", id));
-            ProguserDTO dto = new ProguserDTO(entity);
-            // для правильного отображения select
-            CapCode status = progUserRepository.getForeignKeyEntity(entity,CapCode.class);
-            dto.setStatusDisplay(status.getCapCodeName());
-
-            // выбираем почтовый адрес
-            ProguserChannel email = proguserService.getlEmail(id);
-            if(email!=null) {
-                dto.setProguserchannelAddress(email.getProguserChannelAddress());
-            }
-            return dto;
+                throw new NotFoundException(String.format("Пользователь с идентификатором %s не найден", id));
+            return entity;
         }
     }
 
@@ -165,29 +140,21 @@ public class ProguserController {
             description = ConstantForControllers.SAVE_OPERATION_DESCRIPTION)
     @RequestMapping(value = "proguser/save", method = RequestMethod.POST)
     @Audit(kinds={AuditKind.CALL_FOR_SAVE_UPDATE,AuditKind.CALL_FOR_SAVE_INSERT})
-    public ProguserView save(@RequestBody ProguserDTO proguserDTO) {
-        Proguser entity = proguserDTO.toEntity();
-        entity.setProguserGroupId(Progusergroup.EVERYONE); // всегда в одну группу
-        Proguser result;
-        if(entity.getProguserId()==null) {
-            result = proguserService.add(entity);
+    public ProguserView save(@RequestBody Proguser proguser) {
+        if(proguser.getProguserId()==null) {
+            proguser = proguserService.add(proguser);
         } else {
-            result = proguserService.edit(entity);
+            // Пользователя 1 нельзя удалять
+            if (proguser.getProguserId() == 1) {
+                throw new RuntimeException("Этого пользователя нельзя изменять");
+            }
+            proguser = proguserService.edit(proguser);
         }
         // сброс кэша
-        authenticationCashe.clearByUserName(result.getProguserName());
-        // сохранение адреса
-        proguserService.saveEmail(result.getProguserId(),proguserDTO.getProguserchannelAddress());
-        // устанавливаем связь с ОАУ
-        SelectDisplayData<Integer> subjectValue = proguserDTO.getSubject();
-
-        // устанавливаем связь с Сотрудником
-        SelectDisplayData<Integer> workerValue = proguserDTO.getWorker();
-        progUserRepository.setWorkerLinkWithUser(result.getProguserId(),
-                workerValue!=null?workerValue.getValue():null);
+        authenticationCashe.clearByUserName(proguser.getProguserName());
 
         // выбираем представление для одной записи
-        return proguserService.getOne(result.getProguserId());
+        return proguserService.getOne(proguser.getProguserId());
 
     }
 
@@ -196,6 +163,12 @@ public class ProguserController {
     @RequestMapping(value = "proguser/delete", method = RequestMethod.POST)
     @Audit(kinds={AuditKind.CALL_FOR_DELETE})
     public String delete(@RequestBody int[] ids) {
+        // Пользователя 1 нельзя удалять
+        for (int id : ids) {
+            if (id == 1) {
+                throw new RuntimeException("Этого пользователя нельзя удалять");
+            }
+        }
         // сброс кэша
         for (int i = 0; i < ids.length; i++) {
             ProguserView pu = proguserService.getOne(ids[i]);
@@ -241,62 +214,6 @@ public class ProguserController {
         authenticationCashe.clearByUserName(pu.getProguserName());
 
         return StandardResponse.SUCCESS;
-    }
-
-    @Operation(summary = "Список ролей пользователя",
-            description = "Возвращает список ролей указанного пользователя")
-    @RequestMapping(value = "proguser/roles/getlist", method = RequestMethod.POST)
-    public List<AccessRoleView> accessroles(@RequestBody ProguserRequest request) {
-        List<AccessRole> roles  = proguserService.getRoleList(request.getProguserId());
-        return roles.stream().map(AccessRoleView::new).collect(Collectors.toList());
-    }
-
-    @Operation(summary = "Список ролей пользователя для редактора ролей",
-            description = "Возвращает список ролей указанного пользователя")
-    @RequestMapping(value = "proguser/roles/get", method = RequestMethod.POST)
-    public ProguserAccessRoleView getProguserAccessRoles(@RequestBody Integer id) {
-        Proguser entity = proguserService.findById(id);
-        if(entity==null)
-            throw new NotFoundException(String.format("Запись с идентификатором %s не найдена", id));
-        List<AccessRole> roles  = proguserService.getRoleList(id);
-        ProguserAccessRoleView parv = new ProguserAccessRoleView(entity);
-        parv.setAccessRoleIds(roles.stream()
-                .map(r->r.getAccessRoleId())
-                .collect(Collectors.toList()));
-        return parv;
-    }
-
-
-    @Operation(summary = "Сохранить список ролей пользователя",
-            description = "Сохраняет список ролей указанного пользователя")
-    @RequestMapping(value = "proguser/roles/save", method = RequestMethod.POST)
-    @Audit(kinds={AuditKind.SECURITY_SYSTEM})
-    public String accessrolesSave(@RequestBody ProguserRoleDTO proguserRoleDTO) {
-        proguserService.saveRoles(proguserRoleDTO.getProguserId(),proguserRoleDTO.getAccessRoleIds());
-        // перестраиваем ACL асинхронно
-        jobACLDispather.pushJob(()->acl.buildAccessTable());
-        return StandardResponse.SUCCESS;
-    }
-
-    @Schema(description = "Параметры выборки ролей пользователя")
-    public static class ProguserRequest {
-        @Schema(description = "Идентификатор пользователя")
-        private Integer proguserId;
-
-        public ProguserRequest() {
-        }
-
-        public ProguserRequest(int proguserId) {
-            this.proguserId=proguserId;
-        }
-
-        public Integer getProguserId() {
-            return proguserId;
-        }
-
-        public void setProguserId(Integer proguserId) {
-            this.proguserId = proguserId;
-        }
     }
 
     @Operation(summary = "Список пользователей по поисковой сроке",

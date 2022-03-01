@@ -3,6 +3,7 @@ package biz.gelicon.core.config;
 import biz.gelicon.core.config.Config;
 import biz.gelicon.core.MainApplication;
 import biz.gelicon.core.artifacts.ArtifactManagerImpl;
+import biz.gelicon.core.maintenance.MaintenanceSystemService;
 import biz.gelicon.core.reports.ReportManagerImpl;
 import biz.gelicon.core.repository.RecreateDatabase;
 import biz.gelicon.core.security.ACL;
@@ -36,6 +37,9 @@ public class InitApp implements ApplicationRunner {
 
     @Autowired
     ArtifactManagerImpl artifactManager;
+
+    @Autowired
+    MaintenanceSystemService maintenanceSystemService;
 
     @Value("${gelicon.run-as-test:false}")
     private Boolean runAsTest;
@@ -93,6 +97,9 @@ public class InitApp implements ApplicationRunner {
             artifactManager.loadArtifacts();
 
             reportManager.testJNDI();
+
+            // Заполним таблицу ControlObject
+            maintenanceSystemService.fillControlObject(geliconCorePrefix);
 
         }
 

@@ -21,14 +21,14 @@ public class Proguser {
      * proguser_id для пользователя SYSDBA
      */
     public static final int SYSDBA_PROGUSER_ID = 1;
+    // Активный пользователь
+    public final static int USER_IS_ACTIVE = 1;
+    // Заблокированный пользователь
+    public final static int USER_IS_BLOCKED = 0;
 
     @Id
     @Column(name = "proguser_id")
     private Integer proguserId;
-
-    @NotNull(message = "Группа пользователя не может быть пустой")
-    @Column(name = "progusergroup_id")
-    private Integer proguserGroupId =  Progusergroup.EVERYONE;
 
     @ManyToOne(targetEntity = CapCode.class)
     @NotNull(message = "Статус пользователя не может быть пустым")
@@ -48,21 +48,16 @@ public class Proguser {
     @Column(name = "proguser_fullname")
     private String proguserFullName;
 
-    private Map<String,Object> attributes = new HashMap<>();
-
-
     public Proguser() {
-        proguserGroupId = Progusergroup.EVERYONE;
     }
 
     public Proguser(Integer progUserId, Integer statusId,
-                    String progUserName, String progUserFullName) {
+                    Integer proguserType, String progUserName, String progUserFullName) {
         this.proguserId = progUserId;
-        this.proguserGroupId = Progusergroup.EVERYONE;
         this.statusId = statusId;
+        this.proguserType = proguserType;
         this.proguserName = progUserName;
         this.proguserFullName = progUserFullName;
-        this.proguserType = 0;
     }
 
     public Integer getProguserId() {
@@ -71,14 +66,6 @@ public class Proguser {
 
     public void setProguserId(Integer proguserId) {
         this.proguserId = proguserId;
-    }
-
-    public Integer getProguserGroupId() {
-        return proguserGroupId;
-    }
-
-    public void setProguserGroupId(Integer proguserGroupId) {
-        this.proguserGroupId = proguserGroupId;
     }
 
     public Integer getStatusId() {
@@ -117,23 +104,10 @@ public class Proguser {
         return new UserDetailsImpl(this);
     }
 
-    public boolean isSysDba() {
-        return proguserId==SYSDBA_PROGUSER_ID;
-    }
-
-    public static boolean isSysDba(Integer usrId) {
-        return usrId==SYSDBA_PROGUSER_ID;
-    }
-
-    public Map<String, Object> getAttributes() {
-        return attributes;
-    }
-
     @Override
     public String toString() {
         return "Proguser{" +
                 "proguserId=" + proguserId +
-                ", proguserGroupId=" + proguserGroupId +
                 ", statusId=" + statusId +
                 ", proguserType=" + proguserType +
                 ", proguserName='" + proguserName + '\'' +

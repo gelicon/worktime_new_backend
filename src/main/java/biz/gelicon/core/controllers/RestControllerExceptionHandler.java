@@ -149,7 +149,8 @@ public class RestControllerExceptionHandler {
                 }
             }
         }
-        errorResponse.setErrorMessage(String.format("Существует ссылка на удаляемую запись из таблицы \"%s\"", tableDesc));
+        errorResponse.setErrorMessage(ex.getCause().getMessage());
+        //errorResponse.setErrorMessage(String.format("Существует ссылка на удаляемую запись из таблицы \"%s\"", tableDesc));
     }
 
     private void processIntegrityViolationForUpdateError(DataIntegrityViolationException ex, ErrorResponse errorResponse) {

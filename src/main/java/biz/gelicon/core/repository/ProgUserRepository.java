@@ -3,6 +3,7 @@ package biz.gelicon.core.repository;
 
 import biz.gelicon.core.model.CapCode;
 import biz.gelicon.core.model.Proguser;
+import biz.gelicon.core.model.Progusergroup;
 import biz.gelicon.core.utils.DatabaseUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,56 +58,6 @@ public class ProgUserRepository implements TableRepository<Proguser>  {
         return !users.isEmpty()?users.get(0):null;
     }
 
-    public Proguser findUserLinkWithSubject(Integer subjectId) {
-        List<Proguser> list = findQuery("" +
-                "SELECT p.* " +
-                "FROM proguser p " +
-                "INNER JOIN progusersubject pus ON pus.proguser_id=p.proguser_id " +
-                "WHERE pus.subject_id=:subjectId", "subjectId", subjectId);
-        return list.isEmpty()?null:list.get(0);
-    }
-
-    public void setSubjectLinkWithUser(Integer progUserId, Integer subjectId) {
-        executeSQL("" +
-                        "DELETE FROM progusersubject " +
-                        "WHERE  proguser_id=:proguserId",
-                "proguserId",progUserId);
-        if(subjectId!=null) {
-            String sql = buildInsertClause("progusersubject",
-                    new String[]{"proguser_id", "subject_id"},
-                    new String[]{"proguserId", "subjectId"});
-            Map<String,Object> params = new HashMap<>();
-            params.put("proguserId",progUserId);
-            params.put("subjectId",subjectId);
-            executeSQL(sql,params);
-        }
-    };
-
-    public Proguser findUserLinkWithWorker(Integer workerId) {
-        List<Proguser> list = findQuery("" +
-                "SELECT p.* " +
-                "FROM proguser p " +
-                "INNER JOIN proguserworker puw ON puw.proguser_id=p.proguser_id " +
-                "WHERE puw.worker_id=:workerId", "workerId", workerId);
-        return list.isEmpty()?null:list.get(0);
-    }
-
-    public void setWorkerLinkWithUser(Integer progUserId, Integer workerId) {
-        executeSQL("" +
-                        "DELETE FROM proguserworker " +
-                        "WHERE  proguser_id=:proguserId",
-                "proguserId",progUserId);
-        if(workerId!=null) {
-            String sql = buildInsertClause("proguserworker",
-                    new String[]{"proguser_id", "worker_id"},
-                    new String[]{"proguserId", "workerId"});
-            Map<String,Object> params = new HashMap<>();
-            params.put("proguserId",progUserId);
-            params.put("workerId",workerId);
-            executeSQL(sql,params);
-        }
-    };
-
     @Override
     public void create() {
         Resource resource = new ClassPathResource("sql/400210-proguser.sql");
@@ -132,9 +83,10 @@ public class ProgUserRepository implements TableRepository<Proguser>  {
     @Override
     public int load() {
         Proguser[] data =  new Proguser[] {
-                new Proguser(1, CapCode.USER_IS_ACTIVE,"SYSDBA","Системный администратор"),
-                new Proguser(2, CapCode.USER_IS_ACTIVE,"ADMIN","Администратор"),
-                new Proguser(3, CapCode.USER_IS_BLOCKED,"USER1","Пользователь 1"),
+                new Proguser(1, Proguser.USER_IS_ACTIVE, 1, "SYSDBA","Системный администратор"),
+                new Proguser(2, Proguser.USER_IS_ACTIVE, 1, "ADMIN","Администратор"),
+                new Proguser(3, Proguser.USER_IS_ACTIVE, 0, "USER1","Пользователь 1"),
+                new Proguser(4, Proguser.USER_IS_ACTIVE, 0, "WORKER1","Работник 1"),
         };
         insert(Arrays.asList(data));
         logger.info(String.format("%d proguser loaded", data.length));

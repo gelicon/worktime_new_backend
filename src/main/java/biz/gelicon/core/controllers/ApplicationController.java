@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@Tag(name = "Модуль", description = "Контроллер для объектов \"Модуль\" ")
+@Tag(name = "Модуль", description = "Контроллер для объектов 'Модуль' ")
 @RequestMapping(value = "/v"+ Config.CURRENT_VERSION+"/apps/admin/credential",
         consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE)

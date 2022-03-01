@@ -33,7 +33,9 @@ public class ProgUserGroupRepository implements TableRepository<Progusergroup>  
     @Override
     public int load() {
         Progusergroup[] data =  new Progusergroup[] {
-                new Progusergroup(Progusergroup.EVERYONE,"Все пользователи","",1)
+                new Progusergroup(Progusergroup.EVERYONE,"Все пользователи","Все пользователи",1),
+                new Progusergroup(Progusergroup.ADMIN,"Администраторы","Администраторы системы",1),
+                new Progusergroup(Progusergroup.WORKER,"Работники","Работники предприятия",1),
         };
         insert(Arrays.asList(data));
         logger.info(String.format("%d proguser loaded", data.length));

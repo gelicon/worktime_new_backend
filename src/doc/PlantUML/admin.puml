@@ -93,7 +93,7 @@ entity sqlaction {
 }
 
 entity controlobjectrole {
-  Доступ пользователю на роль
+  Доступ роли на контролируемый объект
   --
   * controlobjectrole_id : INTEGER <<PK>>
   --

@@ -8,9 +8,13 @@ import javax.validation.constraints.Size;
 
 @Table(name = "progusergroup")
 public class Progusergroup {
+
     // группа для всех пользователей
     public final static int EVERYONE = 1;
-
+    // группа для администраторов
+    public final static int ADMIN = 2;
+    // группа для сотрудников
+    public final static int WORKER = 3;
 
     @Id
     @Column(name = "progusergroup_id")
@@ -33,7 +37,8 @@ public class Progusergroup {
         progusergroupVisible = 1;
     }
 
-    public Progusergroup(Integer progUserGroupId, String progUserGroupName, String progUserGroupNote, Integer progUserGroupVisible) {
+    public Progusergroup(Integer progUserGroupId, String progUserGroupName,
+            String progUserGroupNote, Integer progUserGroupVisible) {
         this.progusergroupId = progUserGroupId;
         this.progusergroupName = progUserGroupName;
         this.progusergroupNote = progUserGroupNote;
