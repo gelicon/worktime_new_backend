@@ -1,5 +1,6 @@
 package biz.gelicon.core.service;
 
+import biz.gelicon.core.model.AccessRole;
 import biz.gelicon.core.model.Proguser;
 import biz.gelicon.core.repository.AccessRoleRepository;
 import biz.gelicon.core.repository.ProgUserRepository;
@@ -14,13 +15,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class ProguserService extends BaseService<Proguser> {
     private static final Logger logger = LoggerFactory.getLogger(ProguserService.class);
-    public static final String ALIAS_MAIN = "T";
-    public static final String ALIAS_ENTITY = "U";
+    public static final String ALIAS_MAIN = "U";
 
     @Autowired
     private ProgUserRepository proguserRepository;
@@ -34,13 +37,10 @@ public class ProguserService extends BaseService<Proguser> {
     // главный запрос. используется в главной таблице
     // в контроллере используется в getlist и save
     final String mainSQL=""
-                    + " SELECT T.* "
-                    + " FROM ("
                     + " SELECT U.* "
                     + " FROM   proguser U "
                     + " /*FROM_PLACEHOLDER*/ "
                     + " WHERE 1=1 /*WHERE_PLACEHOLDER*/ "
-                    + " ) T "
                     + " /*ORDERBY_PLACEHOLDER*/";
 
 
@@ -51,10 +51,14 @@ public class ProguserService extends BaseService<Proguser> {
 
     public List<ProguserView> getMainList(GridDataOption gridDataOption) {
 
+        //gridDataOption.addFilter("statusId",1);
+
         return new Query.QueryBuilder<ProguserView>(mainSQL)
                 .setMainAlias(ALIAS_MAIN)
                 .setPageableAndSort(gridDataOption.buildPageRequest())
-                .setFrom(gridDataOption.buildFullTextJoin("proguser",ALIAS_ENTITY))
+                .setFrom(gridDataOption.buildFullTextJoin("proguser",ALIAS_MAIN))
+               // .setPredicate(gridDataOption.buildPredicate(ProguserView.class,ALIAS_MAIN,subsColumns))
+                .setPredicate(gridDataOption.buildPredicate(ProguserView.class,ALIAS_MAIN))
                 .setParams(gridDataOption.buildQueryParams())
                 .build(ProguserView.class)
                 .execute();
@@ -64,7 +68,8 @@ public class ProguserService extends BaseService<Proguser> {
 
         return new Query.QueryBuilder<Proguser>(mainSQL)
                 .setMainAlias(ALIAS_MAIN)
-                .setFrom(gridDataOption.buildFullTextJoin("proguser",ALIAS_ENTITY))
+                .setFrom(gridDataOption.buildFullTextJoin("proguser",ALIAS_MAIN))
+                .setPredicate(gridDataOption.buildPredicate(ProguserView.class,ALIAS_MAIN))
                 .setParams(gridDataOption.buildQueryParams())
                 .build(Proguser.class)
                 .count();
@@ -74,7 +79,7 @@ public class ProguserService extends BaseService<Proguser> {
 
     public ProguserView getOne(Integer id) {
         return new Query.QueryBuilder<ProguserView>(mainSQL)
-                .setPredicate(ALIAS_ENTITY+".proguser_id = :proguserId")
+                .setPredicate(ALIAS_MAIN+".proguser_id = :proguserId")
                 .build(ProguserView.class)
                 .executeOne("proguserId", id);
     }
@@ -83,12 +88,29 @@ public class ProguserService extends BaseService<Proguser> {
         return new Query.QueryBuilder<ProguserView>(mainSQL)
                 .setMainAlias(ALIAS_MAIN)
                 .setPageableAndSort(gridDataOption.buildPageRequest())
-                .setFrom(gridDataOption.buildFullTextJoin("proguser",ALIAS_ENTITY))
-                .setPredicate(gridDataOption.buildPredicate(Proguser.class,ALIAS_ENTITY,null))
+                .setFrom(gridDataOption.buildFullTextJoin("proguser",ALIAS_MAIN))
+                .setPredicate(gridDataOption.buildPredicate(Proguser.class,ALIAS_MAIN,null))
                 .setParams(gridDataOption.buildQueryParams())
                 .build(ProguserView.class)
                 .execute();
 
     }
+
+    public List<AccessRole> getRoleList(Integer proguserId) {
+        List<AccessRole> list = accessRoleRepository.findByUser(proguserId);
+        return list.stream()
+                .sorted((r1,r2)->r1.getAccessRoleName().compareTo(r2.getAccessRoleName()))
+                .collect(Collectors.toList());
+    }
+
+    public void saveRoles(Integer proguserId, List<Integer> accessRoleIds) {
+        // удалили все связи ролей с пользователем
+        accessRoleRepository.unbindProgUser(proguserId);
+        // создаем новые связи ролей с пользователем
+        accessRoleIds.stream()
+                .forEach(roleId->accessRoleRepository.bindWithProgUser(roleId,proguserId));
+
+    }
+
 }
 

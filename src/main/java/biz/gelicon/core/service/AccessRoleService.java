@@ -70,4 +70,3 @@ public class AccessRoleService extends BaseService<AccessRole> {
                 .executeOne("accessroleId", id);
     }
 }
-

@@ -5,7 +5,9 @@ import biz.gelicon.core.audit.AuditKind;
 import biz.gelicon.core.config.Config;
 import biz.gelicon.core.dto.NewProgUserPasswordDTO;
 import biz.gelicon.core.dto.PasswordDTO;
+import biz.gelicon.core.dto.ProguserRoleDTO;
 import biz.gelicon.core.jobs.JobDispatcher;
+import biz.gelicon.core.model.AccessRole;
 import biz.gelicon.core.model.Proguser;
 import biz.gelicon.core.repository.ProgUserRepository;
 import biz.gelicon.core.response.DataResponse;
@@ -23,6 +25,7 @@ import biz.gelicon.core.service.ProguserService;
 import biz.gelicon.core.utils.ConstantForControllers;
 import biz.gelicon.core.utils.GridDataOption;
 import biz.gelicon.core.utils.QueryUtils;
+import biz.gelicon.core.view.ProguserAccessRoleView;
 import biz.gelicon.core.view.ProguserView;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -60,7 +63,12 @@ public class ProguserController {
     public static class GridDataOptionProguser extends GridDataOption {
         @Schema(description = "Фильтры для объекта Пользователь:" +
                 "<ul>" +
-                "<li>status - фильтр по статусу: 1301 - только активных, 1302 - только заблокированных,1303 - только архивных" +
+                "<li>именованный фильтр status - фильтр по статусу: 1 - только активных, 0 - только заблокированных" +
+                "<li>быстрый фильтр по совпадению имени " +
+                "<li>быстрый фильтр по вхождению имени " +
+                "<li>\"filters\":{\"status\": 0, " +
+                "<li>              \"quick.proguserName.eq\":\"SYSDBA\"," +
+                "<li>              \"quick.proguserName.like\":\"S\"}" +
                 "</ul>")
         @Override
         public Map<String, Object> getFilters() {
@@ -96,10 +104,10 @@ public class ProguserController {
                     filters.stream()
                     .map(f->{
                         switch (f.getName()) {
-                            case "statusId":
+                            case "status":
                                 Integer status = (Integer) f.getValue();
                                 if(status!=null) {
-                                    return ProguserService.ALIAS_MAIN+".proguser_status="+status;
+                                    return ProguserService.ALIAS_MAIN+".proguser_status_id = " + status;
                                 }
                                 return null;
                             default:
@@ -243,5 +251,32 @@ public class ProguserController {
             this.search = search;
         }
     }
+
+    @Operation(summary = "Список ролей пользователя для редактора ролей",
+            description = "Возвращает список ролей указанного пользователя")
+    @RequestMapping(value = "proguser/roles/get", method = RequestMethod.POST)
+    public ProguserAccessRoleView getProguserAccessRoles(@RequestBody Integer id) {
+        Proguser entity = proguserService.findById(id);
+        if(entity==null)
+            throw new NotFoundException(String.format("Пользователь с идентификатором %s не найден", id));
+        List<AccessRole> roles  = proguserService.getRoleList(id);
+        ProguserAccessRoleView parv = new ProguserAccessRoleView(entity);
+        parv.setAccessRoleIds(roles.stream()
+                .map(r->r.getAccessRoleId())
+                .collect(Collectors.toList()));
+        return parv;
+    }
+
+    @Operation(summary = "Сохранить список ролей пользователя",
+            description = "Сохраняет список ролей указанного пользователя")
+    @RequestMapping(value = "proguser/roles/save", method = RequestMethod.POST)
+    @Audit(kinds={AuditKind.SECURITY_SYSTEM})
+    public String accessrolesSave(@RequestBody ProguserRoleDTO proguserRoleDTO) {
+        proguserService.saveRoles(proguserRoleDTO.getProguserId(),proguserRoleDTO.getAccessRoleIds());
+        // перестраиваем ACL асинхронно
+        jobACLDispather.pushJob(()->acl.buildAccessTable());
+        return StandardResponse.SUCCESS;
+    }
+
 
 }

@@ -100,7 +100,7 @@ public class GridDataOption {
         this.quickFilters = quickFilters;
     }
 
-    @Schema(description = "Установленные фильтры. Ключом является имя фильтра ")
+    @Schema(description = "Установленные фильтры. Ключом является имя фильтра", example = " \"filters\":{\"quick.proguserName.eq\":\"SYSDBA\"}")
     public Map<String, Object> getFilters() {
         Map<String, Object> filters = new HashMap<>();
         this.namedFilters.stream()
@@ -232,7 +232,8 @@ public class GridDataOption {
                         }
                     }
 
-                    return  columnName +getOperationSQL(f.getOper(),f.getField());
+                    String s = columnName +getOperationSQL(f.getOper(),f.getField());
+                    return  s;
                 })
                 .collect(Collectors.joining(" and "));
         if(!qfilters.isEmpty()) {
@@ -245,7 +246,8 @@ public class GridDataOption {
                 where.add(namedWhere);
             }
         }
-        return where.stream().collect(Collectors.joining(" and "));
+        String s = where.stream().collect(Collectors.joining(" and "));
+        return s;
     }
 
     public static String getOperationSQL(FilterOperation oper, String paramName) {

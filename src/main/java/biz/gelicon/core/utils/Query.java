@@ -124,7 +124,9 @@ public class Query<T> {
     }
 
     private void transformParams(Map<String, Object> args) {
+        Object o = argTransformer.entrySet();
         argTransformer.entrySet().forEach(entry->{
+
             if(args.containsKey(entry.getKey())) {
                 Object argValue = args.get(entry.getKey());
                 Object result = entry.getValue().apply(argValue);

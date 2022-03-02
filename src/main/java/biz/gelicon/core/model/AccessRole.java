@@ -8,7 +8,6 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-/* Сущность сгенерирована 25.04.2021 12:56 */
 @Table(name = "accessrole")
 @TableDescription("Роль")
 public class AccessRole {

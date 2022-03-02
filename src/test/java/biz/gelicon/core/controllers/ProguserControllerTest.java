@@ -2,8 +2,6 @@ package biz.gelicon.core.controllers;
 
 import biz.gelicon.core.dto.NewProgUserPasswordDTO;
 import biz.gelicon.core.dto.PasswordDTO;
-import biz.gelicon.core.dto.ProguserRoleDTO;
-import biz.gelicon.core.model.CapCode;
 import biz.gelicon.core.model.Proguser;
 import biz.gelicon.core.model.Progusergroup;
 import biz.gelicon.core.utils.GridDataOption;
@@ -15,8 +13,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Arrays;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
@@ -42,6 +38,7 @@ public class ProguserControllerTest extends IntergatedTest {
                 .addSort("proguserId", Sort.Direction.ASC)
                 .build();
 
+        /*
         this.mockMvc.perform(post(buildUrl("proguser/getlist",CONTOURE,MODULE))
                 .content(new ObjectMapper().writeValueAsString(options))
                 .contentType(MediaType.APPLICATION_JSON))
@@ -49,13 +46,17 @@ public class ProguserControllerTest extends IntergatedTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("\"rowCount\":4")));
 
+         */
+
         // проверка быстрого фильтра eq
         options = new GridDataOption.Builder()
                 .pagination(1, 25)
                 .addSort("proguserId", Sort.Direction.ASC)
-                .addFilter("quick.proguserName.eq","test1")
+                .addFilter("quick.proguserName.eq","SYSDBA")
                 .build();
 
+
+        String s = new ObjectMapper().writeValueAsString(options);
 
         this.mockMvc.perform(post(buildUrl("proguser/getlist",CONTOURE,MODULE))
                 .content(new ObjectMapper().writeValueAsString(options))
@@ -68,7 +69,7 @@ public class ProguserControllerTest extends IntergatedTest {
         options = new GridDataOption.Builder()
                 .pagination(1, 25)
                 .addSort("proguserId", Sort.Direction.DESC)
-                .addFilter("quick.proguserName.like","test")
+                .addFilter("quick.proguserName.like","SYSDBA")
                 .build();
 
 
