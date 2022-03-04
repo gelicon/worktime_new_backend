@@ -73,6 +73,8 @@ public class BaseService<T> {
 
     protected DataBinder validate(T entity){
         DataBinder dataBinder = new DataBinder(entity);
+        // dav 04.03.2022 Если валидатора нет то ничего не проверяем
+        if (validator == null) return dataBinder;
         dataBinder.addValidators(validator);
         dataBinder.validate();
         if (dataBinder.getBindingResult().hasErrors()) {

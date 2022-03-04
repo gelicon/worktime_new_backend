@@ -4,23 +4,22 @@ import biz.gelicon.core.model.AccessRole;
 import io.swagger.v3.oas.annotations.media.Schema;
 import javax.persistence.Column;
 
-/* Объект сгенерирован 25.04.2021 12:56 */
-@Schema(description = "Представление объекта \"Роль\"")
+@Schema(description = "Представление объекта 'Роль'")
 public class AccessRoleView {
 
-    @Schema(description = "Идентификатор \"Роль\"")
+    @Schema(description = "Идентификатор 'Роль'")
     @Column(name="accessrole_id")
     public Integer accessRoleId;
 
-    @Schema(description = "Наименование")
+    @Schema(description = "Наименование 'Роль'")
     @Column(name="accessrole_name")
     private String accessRoleName;
 
-    @Schema(description = "Описание")
+    @Schema(description = "Описание 'Роль'")
     @Column(name="accessrole_note")
     private String accessRoleNote;
 
-    @Schema(description = "Видимость")
+    @Schema(description = "Видимость 'Роль'")
     @Column(name="accessrole_visible")
     private Integer accessRoleVisible;
 

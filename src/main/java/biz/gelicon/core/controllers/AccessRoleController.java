@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @RestController
@@ -44,7 +45,8 @@ public class AccessRoleController {
 
         @Schema(description = "Фильтры для Роль:" +
                 "<ul>" +
-                "<li>onlyVisible - показывать только видимые роли" +
+                "<li>onlyVisible = 1 - показывать только видимые роли" +
+                "<li>\"filters\":{\"onlyVisible\": 1}" +
                 "</ul>")
         @Override
         public Map<String, Object> getFilters() {
@@ -73,15 +75,15 @@ public class AccessRoleController {
                         switch (f.getName()) {
                             case "onlyVisible":
                                 Integer onlyBlocksFlag = (Integer) f.getValue();
-                                if (onlyBlocksFlag != null && onlyBlocksFlag.intValue() == 1) {
-                                    return AccessRoleService.ALIAS_MAIN + ".accessrole_visible<>0";
+                                if (onlyBlocksFlag != null && onlyBlocksFlag == 1) {
+                                    return AccessRoleService.ALIAS_MAIN + ".accessrole_visible <> 0";
                                 }
                                 return null;
                             default:
                                 return null;
                         }
                     })
-                    .filter(s -> s != null)
+                    .filter(Objects::nonNull)
                     .collect(Collectors.joining(" and "));
 
         });

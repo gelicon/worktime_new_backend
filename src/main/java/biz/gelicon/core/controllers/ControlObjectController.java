@@ -97,7 +97,7 @@ public class ControlObjectController {
     public ControlObjectView save(@RequestBody ControlObjectDTO controlObjectDTO) {
         ControlObject entity = controlObjectDTO.toEntity();
         ControlObject result;
-        if(entity.getControlObjectId()==null) {
+        if(entity.getControlObjectId() == null) {
             result = controlObjectService.add(entity);
         } else {
             result = controlObjectService.edit(entity);

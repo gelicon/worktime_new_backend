@@ -20,6 +20,7 @@ public class ProguserAccessRoleView {
     @Column(name="proguser_fullname")
     private String proguserFullname;
 
+    // Список доступных пользователю родей
     private List<Integer> accessRoleIds;
 
     public ProguserAccessRoleView() {

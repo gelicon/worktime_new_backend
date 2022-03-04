@@ -43,5 +43,37 @@ public class ControlObjectRole {
         this.accessroleId = accessroleId;
         this.sqlactionId = sqlactionId;
     }
+
+    public void setControlobjectroleId(Integer controlobjectroleId) {
+        this.controlobjectroleId = controlobjectroleId;
+    }
+
+    public void setControlobjectId(Integer controlobjectId) {
+        this.controlobjectId = controlobjectId;
+    }
+
+    public void setAccessroleId(Integer accessroleId) {
+        this.accessroleId = accessroleId;
+    }
+
+    public void setSqlactionId(Integer sqlactionId) {
+        this.sqlactionId = sqlactionId;
+    }
+
+    public Integer getControlobjectroleId() {
+        return controlobjectroleId;
+    }
+
+    public Integer getControlobjectId() {
+        return controlobjectId;
+    }
+
+    public Integer getAccessroleId() {
+        return accessroleId;
+    }
+
+    public Integer getSqlactionId() {
+        return sqlactionId;
+    }
 }
 

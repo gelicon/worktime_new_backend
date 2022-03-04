@@ -53,7 +53,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @Tag(name = "Пользователи", description = "Контроллер для объектов \"Пользователь\" ")
-@RequestMapping(value = "/v"+ Config.CURRENT_VERSION+"/apps/admin/credential",
+@RequestMapping(value = "/v" + Config.CURRENT_VERSION + "/apps/admin/credential",
         consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE)
 @Transactional
@@ -61,12 +61,17 @@ public class ProguserController {
 
     @Schema(description = "Параметры выборки данных в таблицу")
     public static class GridDataOptionProguser extends GridDataOption {
+
         @Schema(description = "Фильтры для объекта Пользователь:" +
                 "<ul>" +
-                "<li>именованный фильтр status - фильтр по статусу: 1 - только активных, 0 - только заблокированных" +
+                "<li>именованный фильтр status - фильтр по статусу: 1 - только активных, 0 - только заблокированных"
+                +
+                "<li>именованный фильтр type - фильтр по типу: 1 - только администраторы, 0 - только обычные"
+                +
                 "<li>быстрый фильтр по совпадению имени " +
                 "<li>быстрый фильтр по вхождению имени " +
                 "<li>\"filters\":{\"status\": 0, " +
+                "<li>             \"type\": 1, " +
                 "<li>              \"quick.proguserName.eq\":\"SYSDBA\"," +
                 "<li>              \"quick.proguserName.like\":\"S\"}" +
                 "</ul>")
@@ -101,45 +106,55 @@ public class ProguserController {
         // 2. для именованных фильтров используется функция обратного вызова,
         // которая может добавить предикаты. Сами именнованные параметры в SQL устанавливаются также автоматически
         gridDataOption.setProcessNamedFilter(filters ->
-                    filters.stream()
-                    .map(f->{
-                        switch (f.getName()) {
-                            case "status":
-                                Integer status = (Integer) f.getValue();
-                                if(status!=null) {
-                                    return ProguserService.ALIAS_MAIN+".proguser_status_id = " + status;
-                                }
-                                return null;
-                            default:
-                                return null;
-                        }
-                    })
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.joining(" and "))
+                filters.stream()
+                        .map(f -> {
+                            switch (f.getName()) {
+                                case "status":
+                                    Integer status = (Integer) f.getValue();
+                                    if (status != null) {
+                                        return ProguserService.ALIAS_MAIN + ".proguser_status_id = "
+                                                + status;
+                                    }
+                                    return null;
+                                case "type":
+                                    Integer type = (Integer) f.getValue();
+                                    if (type != null) {
+                                        return ProguserService.ALIAS_MAIN + ".proguser_type = "
+                                                + type;
+                                    }
+                                    return null;
+                                default:
+                                    return null;
+                            }
+                        })
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.joining(" and "))
         );
 
         List<ProguserView> result = proguserService.getMainList(gridDataOption);
 
         int total = 0;
-        if(gridDataOption.getPagination().getPageSize()>0) {
+        if (gridDataOption.getPagination().getPageSize() > 0) {
             total = proguserService.getMainCount(gridDataOption);
         }
-        return BaseService.buildResponse(result,gridDataOption,total);
+        return BaseService.buildResponse(result, gridDataOption, total);
     }
 
     @Operation(summary = ConstantForControllers.GET_OPERATION_SUMMARY,
             description = ConstantForControllers.GET_OPERATION_DESCRIPTION)
     @RequestMapping(value = "proguser/get", method = RequestMethod.POST)
-    @Audit(kinds={AuditKind.CALL_FOR_EDIT,AuditKind.CALL_FOR_ADD})
+    @Audit(kinds = {AuditKind.CALL_FOR_EDIT, AuditKind.CALL_FOR_ADD})
     public Proguser get(@RequestBody(required = false) Integer id) {
         // для добавления
-        if(id==null) {
+        if (id == null) {
             Proguser entity = new Proguser();
             return entity;
         } else {
             Proguser entity = proguserService.findById(id);
-            if(entity==null)
-                throw new NotFoundException(String.format("Пользователь с идентификатором %s не найден", id));
+            if (entity == null) {
+                throw new NotFoundException(
+                        String.format("Пользователь с идентификатором %s не найден", id));
+            }
             return entity;
         }
     }
@@ -147,9 +162,9 @@ public class ProguserController {
     @Operation(summary = ConstantForControllers.SAVE_OPERATION_SUMMARY,
             description = ConstantForControllers.SAVE_OPERATION_DESCRIPTION)
     @RequestMapping(value = "proguser/save", method = RequestMethod.POST)
-    @Audit(kinds={AuditKind.CALL_FOR_SAVE_UPDATE,AuditKind.CALL_FOR_SAVE_INSERT})
+    @Audit(kinds = {AuditKind.CALL_FOR_SAVE_UPDATE, AuditKind.CALL_FOR_SAVE_INSERT})
     public ProguserView save(@RequestBody Proguser proguser) {
-        if(proguser.getProguserId()==null) {
+        if (proguser.getProguserId() == null) {
             proguser = proguserService.add(proguser);
         } else {
             // Пользователя 1 нельзя удалять
@@ -169,7 +184,7 @@ public class ProguserController {
     @Operation(summary = ConstantForControllers.DELETE_OPERATION_SUMMARY,
             description = ConstantForControllers.DELETE_OPERATION_DESCRIPTION)
     @RequestMapping(value = "proguser/delete", method = RequestMethod.POST)
-    @Audit(kinds={AuditKind.CALL_FOR_DELETE})
+    @Audit(kinds = {AuditKind.CALL_FOR_DELETE})
     public String delete(@RequestBody int[] ids) {
         // Пользователя 1 нельзя удалять
         for (int id : ids) {
@@ -193,16 +208,18 @@ public class ProguserController {
     @RequestMapping(value = "proguser/changepswd", method = RequestMethod.POST)
     @ResponseBody
     public String changePassword(@RequestBody
-                               @Parameter(description = "Новый и старый пароли") PasswordDTO dto, Authentication authentication) {
+    @Parameter(description = "Новый и старый пароли") PasswordDTO dto,
+            Authentication authentication) {
         Proguser pu = ((UserDetailsImpl) authentication.getPrincipal()).getProgUser();
         // сброс
         authenticationCashe.clearByUserName(pu.getProguserName());
         // получаем провайдера
-        CredentialProvider<String> crprovider = credentialProviderFactory.getProvider(CredentialProvider.CredentialProviderType.AuthByPassword);
-        if(!crprovider.checkAuthentication(pu.getProguserId(),dto.getOldPassword())) {
+        CredentialProvider<String> crprovider = credentialProviderFactory.getProvider(
+                CredentialProvider.CredentialProviderType.AuthByPassword);
+        if (!crprovider.checkAuthentication(pu.getProguserId(), dto.getOldPassword())) {
             throw new IncorrectUserOrPasswordException();
         }
-        crprovider.updateAuthentication(pu.getProguserId(),dto.getNewPassword(),false);
+        crprovider.updateAuthentication(pu.getProguserId(), dto.getNewPassword(), false);
         return StandardResponse.SUCCESS;
     }
 
@@ -211,10 +228,12 @@ public class ProguserController {
     @RequestMapping(value = "proguser/setpswd", method = RequestMethod.POST)
     @ResponseBody
     public String setPassword(@RequestBody
-                               @Parameter(description = "Новый пароль") NewProgUserPasswordDTO dto) {
+    @Parameter(description = "Новый пароль") NewProgUserPasswordDTO dto) {
         // получаем провайдера
-        CredentialProvider<String> crprovider = credentialProviderFactory.getProvider(CredentialProvider.CredentialProviderType.AuthByPassword);
-        if(!crprovider.updateAuthentication(dto.getProguserId(),dto.getNewPassword(), dto.getTempFlag()!=0)) {
+        CredentialProvider<String> crprovider = credentialProviderFactory.getProvider(
+                CredentialProvider.CredentialProviderType.AuthByPassword);
+        if (!crprovider.updateAuthentication(dto.getProguserId(), dto.getNewPassword(),
+                dto.getTempFlag() != 0)) {
             throw new RuntimeException("Не удалось установить пароль");
         }
         // сброс
@@ -229,7 +248,7 @@ public class ProguserController {
     @RequestMapping(value = "proguser/find", method = RequestMethod.POST)
     public List<ProguserView> find(@RequestBody SimpleSearchOption options) {
         //Защита от коротких поисковых строк
-        if(options.getSearch()!=null && options.getSearch().length()<4) {
+        if (options.getSearch() != null && options.getSearch().length() < 4) {
             return new ArrayList<>();
         }
         GridDataOption qopt = new GridDataOption.Builder()
@@ -241,6 +260,7 @@ public class ProguserController {
     }
 
     public static class SimpleSearchOption {
+
         private String search;
 
         public String getSearch() {
@@ -257,24 +277,27 @@ public class ProguserController {
     @RequestMapping(value = "proguser/roles/get", method = RequestMethod.POST)
     public ProguserAccessRoleView getProguserAccessRoles(@RequestBody Integer id) {
         Proguser entity = proguserService.findById(id);
-        if(entity==null)
-            throw new NotFoundException(String.format("Пользователь с идентификатором %s не найден", id));
-        List<AccessRole> roles  = proguserService.getRoleList(id);
+        if (entity == null) {
+            throw new NotFoundException(
+                    String.format("Пользователь с идентификатором %s не найден", id));
+        }
         ProguserAccessRoleView parv = new ProguserAccessRoleView(entity);
+        List<AccessRole> roles = proguserService.getRoleList(id);
         parv.setAccessRoleIds(roles.stream()
-                .map(r->r.getAccessRoleId())
+                .map(AccessRole::getAccessRoleId)
                 .collect(Collectors.toList()));
         return parv;
     }
 
-    @Operation(summary = "Сохранить список ролей пользователя",
-            description = "Сохраняет список ролей указанного пользователя")
+    @Operation(summary = "Сохранить список ролей пользователя, удалить ненужные",
+            description = "Сохраняет список ролей указанного пользователя, удаляет ненужные")
     @RequestMapping(value = "proguser/roles/save", method = RequestMethod.POST)
-    @Audit(kinds={AuditKind.SECURITY_SYSTEM})
+    @Audit(kinds = {AuditKind.SECURITY_SYSTEM})
     public String accessrolesSave(@RequestBody ProguserRoleDTO proguserRoleDTO) {
-        proguserService.saveRoles(proguserRoleDTO.getProguserId(),proguserRoleDTO.getAccessRoleIds());
+        proguserService.saveRoles(proguserRoleDTO.getProguserId(),
+                proguserRoleDTO.getAccessRoleIds());
         // перестраиваем ACL асинхронно
-        jobACLDispather.pushJob(()->acl.buildAccessTable());
+        jobACLDispather.pushJob(() -> acl.buildAccessTable());
         return StandardResponse.SUCCESS;
     }
 

@@ -7,19 +7,18 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.persistence.Column;
 
-/* Объект сгенерирован 26.04.2021 08:54 */
-@Schema(description = "Представление объекта \"Контролируемый объект\"")
+@Schema(description = "Представление объекта 'Контролируемый объект'")
 public class ControlObjectView {
 
-    @Schema(description = "Идентификатор \"Контролируемый объект\"")
+    @Schema(description = "Идентификатор 'Контролируемый объект'")
     @Column(name="controlobject_id")
     public Integer controlObjectId;
 
-    @Schema(description = "Наименование")
+    @Schema(description = "Наименование 'Контролируемый объект'")
     @Column(name="controlobject_name")
     private String controlObjectName;
 
-    @Schema(description = "Идентификатор ресурса")
+    @Schema(description = "url 'Контролируемый объект'")
     @Column(name="controlobject_url")
     private String controlObjectUrl;
 

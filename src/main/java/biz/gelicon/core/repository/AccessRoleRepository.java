@@ -1,6 +1,7 @@
 package biz.gelicon.core.repository;
 
 import biz.gelicon.core.model.AccessRole;
+import biz.gelicon.core.model.Proguser;
 import biz.gelicon.core.security.Permission;
 import biz.gelicon.core.utils.DatabaseUtils;
 import biz.gelicon.core.view.ObjectRoleView;
@@ -25,7 +26,7 @@ public class AccessRoleRepository implements TableRepository<AccessRole> {
 
     public List<AccessRole> findByUser(Integer progUserId) {
         List<AccessRole> accessRoleList;
-        if (progUserId == 1) {
+        if (progUserId == Proguser.SYSDBA_PROGUSER_ID) {
             // dav SYSDBA имеет доступ на все роли
             accessRoleList = findQuery(""
                     + " SELECT DISTINCT"
@@ -76,7 +77,7 @@ public class AccessRoleRepository implements TableRepository<AccessRole> {
     }
 
     /**
-     * Разрушает связь пользователя с ролью
+     * Отвязывает пользователя с ролью
      *
      * @param accessRoleId
      * @param progUserId
@@ -99,6 +100,8 @@ public class AccessRoleRepository implements TableRepository<AccessRole> {
         map.put("proguser_id", progUserId);
         executeSQL(sqlText, map);
     }
+
+
 
     /**
      * Связывает контролируемый объект с ролью
