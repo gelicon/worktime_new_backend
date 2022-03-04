@@ -4,6 +4,7 @@ import biz.gelicon.core.repository.TableRepository;
 import biz.gelicon.core.response.DataResponse;
 import biz.gelicon.core.response.exceptions.DeleteRecordException;
 import biz.gelicon.core.response.exceptions.PostRecordException;
+import biz.gelicon.core.response.exceptions.RepositoryNotSettingException;
 import biz.gelicon.core.utils.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,7 +87,11 @@ public class BaseService<T> {
     }
 
     public T findById(Integer id){
-        return repository.findById(id);
+        if (repository != null) {
+            return repository.findById(id);
+        } else {
+            throw new RepositoryNotSettingException();
+        }
     }
 
     @Transactional

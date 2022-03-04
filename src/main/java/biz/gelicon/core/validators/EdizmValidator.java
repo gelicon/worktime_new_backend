@@ -1,6 +1,6 @@
 package biz.gelicon.core.validators;
 
-import biz.gelicon.core.model.Proguser;
+import biz.gelicon.core.model.Edizm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
@@ -18,7 +18,7 @@ public class EdizmValidator implements Validator {
     // Проверка на совпадение класса
     @Override
     public boolean supports(Class<?> aClass) {
-        return Proguser.class.equals(aClass);
+        return Edizm.class.equals(aClass);
     }
 
     @Override

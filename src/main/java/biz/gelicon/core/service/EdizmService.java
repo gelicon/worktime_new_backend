@@ -34,14 +34,11 @@ public class EdizmService extends BaseService<Edizm> {
             "/*ORDERBY_PLACEHOLDER*/"
             ,ALIAS_MAIN);
 
-    // todo Разобраться
-    /*
+    // Обязательно должно быть - устанавливается репозиторий и валидатор
     @PostConstruct
     public void init() {
         init(edizmRepository, edizmValidator);
     }
-
-     */
 
     public List<EdizmView> getMainList(GridDataOption gridDataOption) {
         return new Query.QueryBuilder<EdizmView>(mainSQL)
