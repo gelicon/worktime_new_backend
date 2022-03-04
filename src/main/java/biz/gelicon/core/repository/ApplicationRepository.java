@@ -26,6 +26,7 @@ public class ApplicationRepository implements TableRepository<Application> {
     private static final Logger logger = LoggerFactory.getLogger(ApplicationRepository.class);
     @Autowired
     private NamedParameterJdbcTemplate jdbcTemplate;
+    public final static int INITIAL_LOAD_COUNT = 9; // Для теста - сколько грузим в начале столько и ставим
 
     /**
      * Возвращает Application-ы из таблицы application для application_exe

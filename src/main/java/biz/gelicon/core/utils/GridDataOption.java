@@ -3,6 +3,7 @@ package biz.gelicon.core.utils;
 import biz.gelicon.core.annotations.SQLExpression;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
+import net.bytebuddy.implementation.bind.annotation.IgnoreForBinding;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -185,6 +186,7 @@ public class GridDataOption {
         return agrs;
     }
 
+//    @JsonIgnore
     public boolean isFullTextSearch() {
         return this.search!=null && !this.search.isEmpty();
     }

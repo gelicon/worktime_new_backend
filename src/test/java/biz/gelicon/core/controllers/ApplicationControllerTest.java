@@ -1,6 +1,7 @@
 package biz.gelicon.core.controllers;
 
 import biz.gelicon.core.dto.AllowOrDenyApplication;
+import biz.gelicon.core.repository.ApplicationRepository;
 import biz.gelicon.core.utils.GridDataOption;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeAll;
@@ -24,7 +25,7 @@ public class ApplicationControllerTest extends IntergatedTest {
 
     @BeforeAll
     public static void setup() {
-        token = "e9b3c034-fdd5-456f-825b-4c632f2053ac"; //root
+        token = "e9b3c034-fdd5-456f-825b-4c632f2053ac"; //SYSDBA
     }
 
     @Test
@@ -35,13 +36,13 @@ public class ApplicationControllerTest extends IntergatedTest {
                 .addSort("applicationId", Sort.Direction.ASC)
                 .build();
 
+
         this.mockMvc.perform(post(buildUrl("application/getlist",CONTOURE,MODULE))
                 .content(new ObjectMapper().writeValueAsString(options))
                 .contentType(MediaType.APPLICATION_JSON))
                 //.andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("\"rowCount\":4")));
-
+                .andExpect(content().string(containsString("\"rowCount\":" + ApplicationRepository.INITIAL_LOAD_COUNT)));
 
     }
 
