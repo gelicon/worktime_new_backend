@@ -101,7 +101,7 @@ public class GridDataOption {
         this.quickFilters = quickFilters;
     }
 
-    @Schema(description = "Установленные фильтры. Ключом является имя фильтра", example = " \"filters\":{\"quick.proguserName.eq\":\"SYSDBA\"}")
+    @Schema(description = "Установленные фильтры. Ключом является имя фильтра")
     public Map<String, Object> getFilters() {
         Map<String, Object> filters = new HashMap<>();
         this.namedFilters.stream()
@@ -242,8 +242,10 @@ public class GridDataOption {
             where.add(qfilters);
         }
         // именованные фильтры
-        if(this.processNamedFilter!=null) {
-            String namedWhere = this.processNamedFilter.process(getNamedFilters());
+        ProcessNamedFilter processNamedFilter = this.processNamedFilter;
+        if(processNamedFilter != null) {
+            List<NamedFilter> namedFilters = getNamedFilters();
+            String namedWhere = processNamedFilter.process(namedFilters);
             if(!namedWhere.isEmpty()) {
                 where.add(namedWhere);
             }

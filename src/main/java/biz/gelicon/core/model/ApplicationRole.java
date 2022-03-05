@@ -31,5 +31,36 @@ public class ApplicationRole {
 
     public ApplicationRole() {
     }
+
+    public ApplicationRole(Integer applicationroleId, Integer accessroleId,
+            Integer applicationId) {
+        this.applicationroleId = applicationroleId;
+        this.accessroleId = accessroleId;
+        this.applicationId = applicationId;
+    }
+
+    public void setApplicationroleId(Integer applicationroleId) {
+        this.applicationroleId = applicationroleId;
+    }
+
+    public void setAccessroleId(Integer accessroleId) {
+        this.accessroleId = accessroleId;
+    }
+
+    public void setApplicationId(Integer applicationId) {
+        this.applicationId = applicationId;
+    }
+
+    public Integer getApplicationroleId() {
+        return applicationroleId;
+    }
+
+    public Integer getAccessroleId() {
+        return accessroleId;
+    }
+
+    public Integer getApplicationId() {
+        return applicationId;
+    }
 }
 
