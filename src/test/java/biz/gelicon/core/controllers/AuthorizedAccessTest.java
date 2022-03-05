@@ -25,7 +25,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class AuthorizedAccess extends IntergatedTest {
+public class AuthorizedAccessTest extends IntergatedTest {
 
     @BeforeAll
     public static void setup() {
@@ -39,6 +39,8 @@ public class AuthorizedAccess extends IntergatedTest {
     ACL acl;
 
     @Test
+    @Transactional
+    @Rollback
     public void accessTest1() throws Exception {
         // базовая проверка
         GridDataOption options = new GridDataOption.Builder()

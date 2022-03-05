@@ -17,7 +17,8 @@ public class CredentialProviderByPassword implements CredentialProvider<String> 
     public boolean checkAuthentication(Integer progUserId, String authData) {
         ProguserCredential credential = proguserCredentialRepository.findByProguser(progUserId, CapCode.AUTH_BYPASSWORD, 0);
         if(credential!=null) {
-            return SecurityUtils.checkPassword(authData,credential.getProguserCredentialPassword());
+            String proguserCredentialPassword = credential.getProguserCredentialPassword();
+            return SecurityUtils.checkPassword(authData, proguserCredentialPassword);
         }
         return false;
     }

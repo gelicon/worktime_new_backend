@@ -85,8 +85,8 @@ public class ProgUserRepository implements TableRepository<Proguser>  {
         Proguser[] data =  new Proguser[] {
                 new Proguser(1, Proguser.USER_IS_ACTIVE, 1, "SYSDBA","Системный администратор"),
                 new Proguser(2, Proguser.USER_IS_ACTIVE, 1, "ADMIN","Администратор"),
-                new Proguser(3, Proguser.USER_IS_ACTIVE, 0, "USER1","Пользователь 1"),
-                new Proguser(4, Proguser.USER_IS_ACTIVE, 0, "WORKER1","Работник 1"),
+                new Proguser(3, Proguser.USER_IS_BLOCKED, 0, "USER","Пользователь заблокированный"),
+                new Proguser(4, Proguser.USER_IS_ACTIVE, 0, "WORKER","Работник"),
         };
         insert(Arrays.asList(data));
         logger.info(String.format("%d proguser loaded", data.length));
