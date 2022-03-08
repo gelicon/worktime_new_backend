@@ -256,6 +256,7 @@ public class Query<T> {
             }
 
             if(page!=null) {
+                //if (alias == null) return null;
                 // сортировка
                 List<String> orderlist = new ArrayList<>();
                 if(this.prefixOrderBy!=null) {

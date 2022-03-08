@@ -107,6 +107,7 @@ public class InitApp implements ApplicationRunner {
         String swaggerURL = "http://localhost:" + serverPort + "/swagger-ui/index.html?configUrl=/v3/api-docs/swagger-config";
         logger.info(swaggerURL);
         logger.info("Use token for SYSDBA=e9b3c034-fdd5-456f-825b-4c632f2053ac");
+        logger.info("Use token for ADMIN=15a5a967-7a71-46f4-9af9-e3878b7fffac");
         logger.info("=================================================");
 
     }

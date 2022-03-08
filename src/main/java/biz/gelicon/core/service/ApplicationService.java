@@ -1,6 +1,8 @@
 package biz.gelicon.core.service;
 
 import biz.gelicon.core.model.Application;
+import biz.gelicon.core.model.ApplicationRole;
+import biz.gelicon.core.model.ControlObject;
 import biz.gelicon.core.model.Proguser;
 import biz.gelicon.core.repository.ApplicationRepository;
 import biz.gelicon.core.utils.GridDataOption;
@@ -67,5 +69,17 @@ public class ApplicationService extends BaseService<Application> {
     }
 
 
+    /**
+     * Спикок всех приложений
+     */
+    public List<ApplicationRole> getAllList() {
+        String sql = ""
+                + " SELECT * "
+                + " FROM   application "
+                + " ORDER BY 1";
+        return new Query.QueryBuilder<ApplicationRole>(sql)
+                .build(ApplicationRole.class)
+                .execute();
+    }
 }
 

@@ -17,6 +17,7 @@ import biz.gelicon.core.utils.ConstantForControllers;
 import biz.gelicon.core.utils.GridDataOption;
 import biz.gelicon.core.view.ApplicationRoleView;
 import biz.gelicon.core.view.ApplicationView;
+import biz.gelicon.core.view.ApplicationWithAccessRoleView;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -66,32 +67,32 @@ public class ApplicationRoleController {
             description = ConstantForControllers.GETLIST_OPERATION_DESCRIPTION)
     @CheckPermission
     @RequestMapping(value = "applicationrole/getlist", method = RequestMethod.POST)
-    public DataResponse<ApplicationRoleView> getlist(
+    public DataResponse<ApplicationWithAccessRoleView> getlist(
             @RequestBody GridDataOptionApplicationRole gridDataOption) {
         gridDataOption.setProcessNamedFilter(filters ->
                 filters.stream()
                         .map(f -> {
-                            switch (f.getName().toUpperCase()) {
-                                case "ACCESSROLEID":
-                                    Integer accessRoleId = (Integer) f.getValue();
-                                    if (accessRoleId != null) {
-                                        return ApplicationRoleService.ALIAS_MAIN
-                                                + ".accessrole_id = "
-                                                + accessRoleId;
-                                    }
-                                    return null;
-                                default:
-                                    return null;
+                            if ("ACCESSROLEID".equals(f.getName().toUpperCase())) {
+                                Integer accessRoleId = (Integer) f.getValue();
+                                if (accessRoleId != null) {
+                                    return ApplicationRoleService.ALIAS_MAIN
+                                            + ".accessrole_id = "
+                                            + accessRoleId;
+                                }
+                                return null;
                             }
+                            return null;
                         })
                         .filter(Objects::nonNull)
                         .collect(Collectors.joining(" and "))
         );
-        List<ApplicationRoleView> result = applicationRoleService.getMainList(gridDataOption);
+        //List<ApplicationRoleView> result = applicationRoleService.getMainList(gridDataOption);
+        List<ApplicationWithAccessRoleView> result = applicationRoleService.getMainListForRole(gridDataOption);
 
         int total = 0;
         if (gridDataOption.getPagination().getPageSize() > 0) {
-            total = applicationRoleService.getMainCount(gridDataOption);
+            //total = applicationRoleService.getMainCount(gridDataOption);
+            total = applicationRoleService.getMainCountForRole(gridDataOption);
         }
         return BaseService.buildResponse(result, gridDataOption, total);
     }

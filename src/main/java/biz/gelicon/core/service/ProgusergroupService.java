@@ -5,6 +5,7 @@ import biz.gelicon.core.repository.ProgUserGroupRepository;
 import biz.gelicon.core.utils.GridDataOption;
 import biz.gelicon.core.utils.Query;
 import biz.gelicon.core.validators.ProgusergroupValidator;
+import biz.gelicon.core.view.ApplicationView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,9 +41,12 @@ public class ProgusergroupService extends BaseService<Progusergroup> {
     }
 
     public List<Progusergroup> getMainList(GridDataOption gridDataOption) {
+        String predicate = gridDataOption.buildPredicate(Progusergroup.class, ALIAS_MAIN);
         return new Query.QueryBuilder<Progusergroup>(mainSQL)
                 .setMainAlias(ALIAS_MAIN)
                 .setPageableAndSort(gridDataOption.buildPageRequest())
+                .setFrom(gridDataOption.buildFullTextJoin("progusergroup", ALIAS_MAIN))
+                .setPredicate(predicate)
                 .setParams(gridDataOption.buildQueryParams())
                 .build(Progusergroup.class)
                 .execute();

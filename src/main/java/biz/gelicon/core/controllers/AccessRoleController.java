@@ -33,7 +33,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @RestController
-@Tag(name = "Роли", description = "Контроллер для объектов \"Роль\" ")
+@Tag(name = "Роли", description = "Контроллер для объектов 'Роль' ")
 @RequestMapping(value = "/v" + Config.CURRENT_VERSION + "/apps/admin/credential",
         consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE)
@@ -72,16 +72,14 @@ public class AccessRoleController {
         gridDataOption.setProcessNamedFilter(filters -> {
             return filters.stream()
                     .map(f -> {
-                        switch (f.getName()) {
-                            case "onlyVisible":
-                                Integer onlyBlocksFlag = (Integer) f.getValue();
-                                if (onlyBlocksFlag != null && onlyBlocksFlag == 1) {
-                                    return AccessRoleService.ALIAS_MAIN + ".accessrole_visible <> 0";
-                                }
-                                return null;
-                            default:
-                                return null;
+                        if ("onlyVisible".equals(f.getName())) {
+                            Integer onlyBlocksFlag = (Integer) f.getValue();
+                            if (onlyBlocksFlag != null && onlyBlocksFlag == 1) {
+                                return AccessRoleService.ALIAS_MAIN + ".accessrole_visible <> 0";
+                            }
+                            return null;
                         }
+                        return null;
                     })
                     .filter(Objects::nonNull)
                     .collect(Collectors.joining(" and "));
@@ -93,7 +91,6 @@ public class AccessRoleController {
         if (gridDataOption.getPagination().getPageSize() > 0) {
             total = accessRoleService.getMainCount(gridDataOption);
         }
-        ;
         return BaseService.buildResponse(result, gridDataOption, total);
     }
 
@@ -127,6 +124,9 @@ public class AccessRoleController {
         if (entity.getAccessRoleId() == null) {
             result = accessRoleService.add(entity);
         } else {
+            if (entity.getAccessRoleId() == 1) {
+                throw new RuntimeException("Эту роль нельзя изменять");
+            }
             result = accessRoleService.edit(entity);
         }
         clearAuthCasheForRole(result.getAccessRoleId());
@@ -141,8 +141,11 @@ public class AccessRoleController {
     @Audit(kinds = {AuditKind.CALL_FOR_DELETE})
     public String delete(@RequestBody int[] ids) {
         // сброс кэша
-        for (int i = 0; i < ids.length; i++) {
-            clearAuthCasheForRole(ids[i]);
+        for (int id : ids) {
+            if (id == 1) {
+                throw new RuntimeException("Эту роль нельзя удалять");
+            }
+            clearAuthCasheForRole(id);
         }
         accessRoleService.deleteByIds(ids);
         return "{\"status\": \"success\"}";

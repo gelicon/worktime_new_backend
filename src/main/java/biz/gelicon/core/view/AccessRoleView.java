@@ -23,14 +23,10 @@ public class AccessRoleView {
     @Column(name="accessrole_visible")
     private Integer accessRoleVisible;
 
-
     public AccessRoleView() {}
 
-    public AccessRoleView(
-            Integer accessRoleId,
-            String accessRoleName,
-            String accessRoleNote,
-            Integer accessRoleVisible) {
+    public AccessRoleView(Integer accessRoleId, String accessRoleName, String accessRoleNote,
+            Integer accessRoleVisible, String applicationName) {
         this.accessRoleId = accessRoleId;
         this.accessRoleName = accessRoleName;
         this.accessRoleNote = accessRoleNote;

@@ -1,9 +1,13 @@
 package biz.gelicon.core.repository;
 
 import biz.gelicon.core.model.AccessRole;
+import biz.gelicon.core.model.ControlObject;
 import biz.gelicon.core.model.Proguser;
 import biz.gelicon.core.security.Permission;
+import biz.gelicon.core.service.ControlObjectService;
 import biz.gelicon.core.utils.DatabaseUtils;
+import biz.gelicon.core.utils.GridDataOption;
+import biz.gelicon.core.view.ControlObjectView;
 import biz.gelicon.core.view.ObjectRoleView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +26,12 @@ public class AccessRoleRepository implements TableRepository<AccessRole> {
     private static final Logger logger = LoggerFactory.getLogger(AccessRoleRepository.class);
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private ControlObjectService controlObjectService;
+
+    // Ид для роли SYSDBA
+    public static final int SYSDBA_ACCESSROLE_ID = 1;
 
 
     public List<AccessRole> findByUser(Integer progUserId) {
@@ -50,22 +60,27 @@ public class AccessRoleRepository implements TableRepository<AccessRole> {
     public List<ObjectRoleView> findAllObjectRoles() {
         String sqlText = "" +
                 "SELECT DISTINCT " +
-                    "cor.accessrole_id, " +
-                    "cor.controlobject_id, " +
-                    "co.controlobject_url, " +
-                    "cor.sqlaction_id " +
+                "cor.accessrole_id, " +
+                "cor.controlobject_id, " +
+                "co.controlobject_url, " +
+                "cor.sqlaction_id " +
                 "FROM   controlobjectrole cor " +
-                    "INNER JOIN accessrole ar ON ar.accessrole_id=cor.accessrole_id " +
-                    "INNER JOIN controlobject co ON co.controlobject_id=cor.controlobject_id " +
+                "INNER JOIN accessrole ar ON ar.accessrole_id=cor.accessrole_id " +
+                "INNER JOIN controlobject co ON co.controlobject_id=cor.controlobject_id " +
                 "WHERE ar.accessrole_visible!=0";
-        return findQuery(ObjectRoleView.class,sqlText);
+        return findQuery(ObjectRoleView.class, sqlText);
     }
 
     /**
      * Связывает пользователя с ролью
-     *
      */
     public void bindWithProgUser(Integer accessRoleId, Integer progUserId) {
+        // Роль SYSDBA можно связать только с SYSDBA и наоборот
+        if ((accessRoleId == SYSDBA_ACCESSROLE_ID && progUserId != Proguser.SYSDBA_PROGUSER_ID)
+                || (progUserId == Proguser.SYSDBA_PROGUSER_ID
+                && accessRoleId != SYSDBA_ACCESSROLE_ID)) {
+            return;
+        }
         String sqlText =
                 "INSERT INTO proguserrole (proguserrole_id, proguser_id,accessrole_id) " +
                         "VALUES (:id,:proguser_id,:accessrole_id)";
@@ -79,13 +94,18 @@ public class AccessRoleRepository implements TableRepository<AccessRole> {
     /**
      * Отвязывает пользователя с ролью
      *
-     * @param accessRoleId
-     * @param progUserId
+     * @param accessRoleId роль
+     * @param progUserId юзер
      */
     public void unbindProgUser(Integer accessRoleId, Integer progUserId) {
-        String sqlText =
-                "DELETE FROM proguserrole " +
-                        "WHERE accessrole_id=:accessrole_id AND proguser_id=:proguser_id ";
+        // Роль SYSDBA нельзя отвязать от SYSDBA
+        if (accessRoleId == SYSDBA_ACCESSROLE_ID && progUserId == Proguser.SYSDBA_PROGUSER_ID) {
+            return;
+        }
+        String sqlText = ""
+                + " DELETE FROM proguserrole "
+                + " WHERE accessrole_id = :accessrole_id "
+                + "   AND proguser_id = :proguser_id ";
         Map<String, Object> map = new HashMap<>();
         map.put("proguser_id", progUserId);
         map.put("accessrole_id", accessRoleId);
@@ -102,10 +122,8 @@ public class AccessRoleRepository implements TableRepository<AccessRole> {
     }
 
 
-
     /**
      * Связывает контролируемый объект с ролью
-     *
      */
     public void bindWithControlObject(Integer accessRoleId, Integer controlObjectId,
             Permission permission) {
@@ -131,7 +149,6 @@ public class AccessRoleRepository implements TableRepository<AccessRole> {
 
     /**
      * Разрушает связь контролируемого объекта с ролью
-     *
      */
     public void unbindControlObject(Integer accessRoleId, Integer controlObjectId) {
         String sqlText =
@@ -149,7 +166,7 @@ public class AccessRoleRepository implements TableRepository<AccessRole> {
         Resource resource = new ClassPathResource("sql/400230-accessrole.sql");
         ResourceDatabasePopulator databasePopulator = new ResourceDatabasePopulator(resource);
         databasePopulator.setSqlScriptEncoding("UTF-8");
-        databasePopulator.execute(jdbcTemplate.getDataSource());
+        databasePopulator.execute(Objects.requireNonNull(jdbcTemplate.getDataSource()));
         logger.info("accessrole created");
     }
 
@@ -173,11 +190,25 @@ public class AccessRoleRepository implements TableRepository<AccessRole> {
         bindWithProgUser(3, 2);
 
         //Роль 3- EDIZM связана с всеми функциями edizm
-        bindWithControlObject(3, 1, Permission.EXECUTE); // Единицы измерения: Получение списка объектов
-        bindWithControlObject(3, 2, Permission.EXECUTE); // Единицы измерения: Получение объекта по идентификатору
-        bindWithControlObject(3, 3, Permission.EXECUTE); // Единицы измерения: Сохранение - вставка
-        bindWithControlObject(3, 4, Permission.EXECUTE); // Единицы измерения: Сохранение - изменение
-        bindWithControlObject(3, 5, Permission.EXECUTE); // Единицы измерения: Удаление
+        // Единицы измерения: Получение списка объектов
+        bindWithControlObject(3, 1, Permission.EXECUTE);
+        // Единицы измерения: Получение объекта по идентификатору
+        bindWithControlObject(3, 2, Permission.EXECUTE);
+        // Единицы измерения: Сохранение - вставка
+        bindWithControlObject(3, 3, Permission.EXECUTE);
+        // Единицы измерения: Сохранение - изменение
+        bindWithControlObject(3, 4, Permission.EXECUTE);
+        // Единицы измерения: Удаление
+        bindWithControlObject(3, 5, Permission.EXECUTE);
+
+        // Роль 2-ADMIN связана со всеми контролируемыми объектами администрирования
+        // Добавим все что загружено вручную
+        List<ControlObject> controlObjectList = controlObjectService.getAllList();
+        controlObjectList.forEach(controlObject -> {
+            bindWithControlObject(2, controlObject.getControlObjectId(), Permission.EXECUTE);
+        });
+        // Роль в модуле
+        //bindWithControlObject(2, 1, Permission.EXECUTE); // Единицы измерения: Получение списка объектов
 
         return data.length;
     }

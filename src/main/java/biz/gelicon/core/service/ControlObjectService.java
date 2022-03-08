@@ -1,6 +1,7 @@
 package biz.gelicon.core.service;
 
 import biz.gelicon.core.model.ControlObject;
+import biz.gelicon.core.repository.AccessRoleRepository;
 import biz.gelicon.core.repository.ControlObjectRepository;
 import biz.gelicon.core.security.Permission;
 import biz.gelicon.core.utils.GridDataOption;
@@ -20,7 +21,7 @@ import java.util.Map;
 @Service
 public class ControlObjectService extends BaseService<ControlObject> {
     private static final Logger logger = LoggerFactory.getLogger(ControlObjectService.class);
-    public static final String ALIAS_MAIN = "m0";
+    public static final String ALIAS_MAIN = "CO";
 
     @Autowired
     private ControlObjectRepository controlObjectRepository;
@@ -29,17 +30,18 @@ public class ControlObjectService extends BaseService<ControlObject> {
 
     // главный запрос. используется в главной таблице
     // в контроллере используется в getlist и save
-    final String mainSQL=String.format(
-            "SELECT %s.*, cor.controlobjectrole_id " +
-                    "FROM controlobject %1$s " +
-                          "LEFT OUTER JOIN controlobjectrole cor " +
-                                        "ON cor.controlobject_id=%1$s.controlobject_id AND " +
-                                           "cor.sqlaction_id=:sqlactionId AND cor.accessrole_id=:accessRoleId " +
-                        "/*FROM_PLACEHOLDER*/ " +
-                    "WHERE 1=1 /*WHERE_PLACEHOLDER*/ " +  //WHERE_PLACEHOLDER если не пуст, всегда добавляет and, поэтому требуется 1=1
-                    "/*ORDERBY_PLACEHOLDER*/"
+    final String mainSQL=String.format(""
+                    + " SELECT %s.*,"
+                    + "        COR.controlobjectrole_id "
+                    + " FROM   controlobject %1$s "
+                    + "        LEFT OUTER JOIN controlobjectrole COR "
+                    + "          ON COR.controlobject_id = %1$s.controlobject_id "
+                    + "         AND COR.sqlaction_id = :sqlactionId "
+                    + "         AND COR.accessrole_id = :accessRoleId "
+                    + " /*FROM_PLACEHOLDER*/ "
+                    + " WHERE 1 = 1 /*WHERE_PLACEHOLDER*/ "
+                    + " /*ORDERBY_PLACEHOLDER*/"
             ,ALIAS_MAIN);
-
 
     @PostConstruct
     public void init() {
@@ -60,6 +62,19 @@ public class ControlObjectService extends BaseService<ControlObject> {
                 .execute();
     }
 
+    /**
+     * Спикок всех контролируемых объектов
+     */
+    public List<ControlObject> getAllList() {
+        String sql = ""
+                + " SELECT * "
+                + " FROM   controlobject "
+                + " ORDER BY 1";
+        return new Query.QueryBuilder<ControlObject>(sql)
+                .build(ControlObject.class)
+                .execute();
+    }
+
     public int getMainCount(GridDataOption gridDataOption) {
         Map<String, Object> params = gridDataOption.buildQueryParams();
         params.put("sqlactionId", Permission.EXECUTE.ordinal());
@@ -75,16 +90,19 @@ public class ControlObjectService extends BaseService<ControlObject> {
 
     public ControlObjectView getOne(Integer id) {
         return new Query.QueryBuilder<ControlObjectView>(
-                String.format(
-                        "SELECT * " +
-                        "FROM controlobject %s " +
-                        "WHERE 1=1 /*WHERE_PLACEHOLDER*/",ALIAS_MAIN))
-                .setPredicate(ALIAS_MAIN+".controlobject_id=:controlobjectId")
+                String.format(""
+                        + "SELECT * "
+                        + " FROM controlobject %s "
+                        + " WHERE 1 = 1 /*WHERE_PLACEHOLDER*/",
+                        ALIAS_MAIN))
+                .setPredicate(ALIAS_MAIN+".controlobject_id = :controlobjectId")
                 .build(ControlObjectView.class)
                 .executeOne("controlobjectId", id);
     }
 
     public void allow(Integer accessroleId, Integer[] controlObjectIds) {
+        // Для SYSDBA нечего добавлять - он и так все умеет
+        if (accessroleId == AccessRoleRepository.SYSDBA_ACCESSROLE_ID) return;
         for (Integer coId :controlObjectIds) {
             controlObjectRepository.allow(accessroleId,coId,Permission.EXECUTE);
         }

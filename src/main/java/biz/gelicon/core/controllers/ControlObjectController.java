@@ -65,7 +65,7 @@ public class ControlObjectController {
     public DataResponse<ControlObjectView> getlist(@RequestBody GridDataOptionControlObject gridDataOption) {
         boolean accessroleFound = gridDataOption.getNamedFilters().stream().anyMatch(nf -> "accessRoleId".equals(nf.getName()));
         if(!accessroleFound)
-            throw new RuntimeException("Требуется именованный фильтр accessRoleId");
+            throw new RuntimeException("Требуется именованный фильтр, пример \"filters\":{\"accessRoleId\": 3}");
         List<ControlObjectView> result = controlObjectService.getMainList(gridDataOption);
         int total = 0;
         if(gridDataOption.getPagination().getPageSize()>0) {

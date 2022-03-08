@@ -1,14 +1,9 @@
 package biz.gelicon.core.view;
 
-import biz.gelicon.core.annotations.SQLExpression;
-import biz.gelicon.core.model.AccessRole;
-import biz.gelicon.core.model.Application;
 import biz.gelicon.core.model.ApplicationRole;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.persistence.Column;
-import javax.persistence.ManyToOne;
 
 @Schema(description = "Представление объекта 'Приложение для роли'")
 public class ApplicationRoleView {
@@ -25,15 +20,39 @@ public class ApplicationRoleView {
     @Column(name="application_id")
     public Integer applicationId;
 
+    @Schema(description = "Код приложения")
+    @Column(name="application_code")
+    private String applicationCode;
+
+    @Schema(description = "Наименование приложения")
+    @Column(name="application_name")
+    private String applicationName;
+
+    public void setApplicationName(String applicationName) {
+        this.applicationName = applicationName;
+    }
+
+    public String getApplicationName() {
+        return applicationName;
+    }
+
     public ApplicationRoleView() {}
 
-    public ApplicationRoleView(
-            Integer applicationroleId,
-            Integer accessroleId,
-            Integer applicationId) {
+    public String getApplicationCode() {
+        return applicationCode;
+    }
+
+    public void setApplicationCode(String applicationCode) {
+        this.applicationCode = applicationCode;
+    }
+
+    public ApplicationRoleView(Integer applicationroleId, Integer accessroleId,
+            Integer applicationId, String applicationCode, String applicationName) {
         this.applicationroleId = applicationroleId;
         this.accessroleId = accessroleId;
         this.applicationId = applicationId;
+        this.applicationCode = applicationCode;
+        this.applicationName = applicationName;
     }
 
     public ApplicationRoleView(ApplicationRole entity) {
@@ -65,5 +84,6 @@ public class ApplicationRoleView {
     public Integer getApplicationId() {
         return applicationId;
     }
+
 }
 
