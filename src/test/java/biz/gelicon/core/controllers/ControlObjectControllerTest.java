@@ -30,7 +30,7 @@ public class ControlObjectControllerTest extends IntergatedTest {
 
     @BeforeAll
     public static void setup() {
-        token = "e9b3c034-fdd5-456f-825b-4c632f2053ac"; //root
+        token = "e9b3c034-fdd5-456f-825b-4c632f2053ac"; //SYSDBA
     }
 
     @Test

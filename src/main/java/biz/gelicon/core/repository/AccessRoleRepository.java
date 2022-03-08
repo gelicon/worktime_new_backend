@@ -167,24 +167,17 @@ public class AccessRoleRepository implements TableRepository<AccessRole> {
         // Пользователь SYSDBA всегда связан с ролью SYSDBA
         bindWithProgUser(1, 1);
 
-        // Пользователь ADMIN связан с ролью ADMIN
+        // Пользователь 2-ADMIN связан с ролью 2-ADMIN
         bindWithProgUser(2, 2);
-        // Пользователь USER1 связан с ролью EDIZM
-        bindWithProgUser(3, 3);
+        // Пользователь 2-ADMIN связан с ролью 3-EDIZM
+        bindWithProgUser(3, 2);
 
-        // todo - сделать
-        /*
-        //Роль TEST1 связана с всеми функциями edizm, кроме удаления
-        bindWithControlObject(1, 1, Permission.EXECUTE);
-        bindWithControlObject(1, 2, Permission.EXECUTE);
-        bindWithControlObject(1, 3, Permission.EXECUTE);
-        // это расширения get (#add и #edit)
-        bindWithControlObject(1, 5, Permission.EXECUTE);
-        bindWithControlObject(1, 6, Permission.EXECUTE);
-        // это delete - свяжем с другими ролями
-        bindWithControlObject(2, 4, Permission.EXECUTE);
-        bindWithControlObject(4, 4, Permission.EXECUTE);
-         */
+        //Роль 3- EDIZM связана с всеми функциями edizm
+        bindWithControlObject(3, 1, Permission.EXECUTE); // Единицы измерения: Получение списка объектов
+        bindWithControlObject(3, 2, Permission.EXECUTE); // Единицы измерения: Получение объекта по идентификатору
+        bindWithControlObject(3, 3, Permission.EXECUTE); // Единицы измерения: Сохранение - вставка
+        bindWithControlObject(3, 4, Permission.EXECUTE); // Единицы измерения: Сохранение - изменение
+        bindWithControlObject(3, 5, Permission.EXECUTE); // Единицы измерения: Удаление
 
         return data.length;
     }

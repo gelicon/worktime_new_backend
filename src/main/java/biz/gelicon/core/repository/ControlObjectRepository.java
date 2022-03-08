@@ -27,12 +27,12 @@ public class ControlObjectRepository implements TableRepository<ControlObject> {
     private NamedParameterJdbcTemplate jdbcTemplate;
 
     /**
-     * Каскадное удаление со всеми ссылками
-     * Удаляет из таблиц controlobjectrole
-     * //TODO подумать о deleteCascadeAll
+     * Каскадное удаление со всеми ссылками Удаляет из таблиц controlobjectrole //TODO подумать о
+     * deleteCascadeAll
+     *
      * @param controlObjectId
      */
-    public void deleteCascade(Integer controlObjectId){
+    public void deleteCascade(Integer controlObjectId) {
         // Таблица controlObject
         String sqlText = ""
                 + " DELETE FROM controlobjectrole "
@@ -107,37 +107,29 @@ public class ControlObjectRepository implements TableRepository<ControlObject> {
 
     @Override
     public int load() {
-        // todo
-        /*
+        // Загрузим для теста
+        // Остальные загружаются при старте из аннотаций
         String v1 = "/v" + Config.CURRENT_VERSION + "/";
         ControlObject[] data = new ControlObject[]{
-                new ControlObject(1, "Просмотр списка единиц измерения",
+                new ControlObject(1, "Единицы измерения: Получение списка объектов",
                         v1 + "apps/refbooks/edizm/edizm/getlist"),
                 new ControlObject(2,
-                        "Получение единицы измерения с целью редактирования/добавления",
+                        "Единицы измерения: Получение объекта по идентификатору",
                         v1 + "apps/refbooks/edizm/edizm/get"),
-                new ControlObject(3, "Сохранение единицы измерения",
-                        v1 + "apps/refbooks/edizm/edizm/save"),
-                new ControlObject(4, "Удаление единицы измерения",
-                        v1 + "apps/refbooks/edizm/edizm/delete"),
-                new ControlObject(5, "Получение единицы измерения с целью редактирования",
-                        v1 + "apps/refbooks/edizm/edizm/get#edit"),
-                new ControlObject(6, "Получение единицы измерения с целью добавления",
-                        v1 + "apps/refbooks/edizm/edizm/get#add"),
-                new ControlObject(7, "Сохранение новой единицы измерения",
+                new ControlObject(3, "Единицы измерения: Сохранение - вставка",
                         v1 + "apps/refbooks/edizm/edizm/save#ins"),
-                new ControlObject(8, "Обновление единицы измерения",
+                new ControlObject(4, "Единицы измерения: Сохранение - изменение",
                         v1 + "apps/refbooks/edizm/edizm/save#upd"),
+                new ControlObject(5, "Единицы измерения: Удаление",
+                        v1 + "apps/refbooks/edizm/edizm/delete"),
+                new ControlObject(6, "Группы пользователей: Удаление",
+                        v1 + "apps/admin/credential/progusergroup/delete")
         };
         insert(Arrays.asList(data));
         logger.info(String.format("%d controlobject loaded", data.length));
         DatabaseUtils.setSequence("controlobject_id_gen", data.length + 1);
         return data.length;
-
-         */
-        return 0;
     }
-
 
 
 }

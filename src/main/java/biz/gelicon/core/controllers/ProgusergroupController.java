@@ -1,6 +1,7 @@
 package biz.gelicon.core.controllers;
 
 import biz.gelicon.core.annotations.Audit;
+import biz.gelicon.core.annotations.CheckPermission;
 import biz.gelicon.core.audit.AuditKind;
 import biz.gelicon.core.config.Config;
 import biz.gelicon.core.jobs.JobDispatcher;
@@ -60,6 +61,7 @@ public class ProgusergroupController {
     @Operation(summary = ConstantForControllers.GETLIST_OPERATION_SUMMARY,
             description = ConstantForControllers.GETLIST_OPERATION_DESCRIPTION)
     @RequestMapping(value = "progusergroup/getlist", method = RequestMethod.POST)
+    @CheckPermission
     public DataResponse<Progusergroup> getlist(@RequestBody GridDataOption gridDataOption) {
         // Фильтров нет
         List<Progusergroup> result = progusergroupService.getMainList(gridDataOption);
@@ -75,6 +77,7 @@ public class ProgusergroupController {
             description = ConstantForControllers.GET_OPERATION_DESCRIPTION)
     @RequestMapping(value = "progusergroup/get", method = RequestMethod.POST)
     @Audit(kinds = {AuditKind.CALL_FOR_EDIT, AuditKind.CALL_FOR_ADD})
+    @CheckPermission
     public Progusergroup get(@RequestBody(required = false) Integer id) {
         // для добавления
         if (id == null) {
@@ -93,6 +96,7 @@ public class ProgusergroupController {
             description = ConstantForControllers.SAVE_OPERATION_DESCRIPTION)
     @RequestMapping(value = "progusergroup/save", method = RequestMethod.POST)
     @Audit(kinds = {AuditKind.CALL_FOR_SAVE_UPDATE, AuditKind.CALL_FOR_SAVE_INSERT})
+    @CheckPermission
     public Progusergroup save(@RequestBody Progusergroup progusergroup) {
         Progusergroup entity = progusergroup;
         Progusergroup result;
@@ -110,6 +114,7 @@ public class ProgusergroupController {
             description = ConstantForControllers.DELETE_OPERATION_DESCRIPTION)
     @RequestMapping(value = "progusergroup/delete", method = RequestMethod.POST)
     @Audit(kinds = {AuditKind.CALL_FOR_DELETE})
+    @CheckPermission
     public String delete(@RequestBody int[] ids) {
         progusergroupService.deleteByIds(ids);
         return StandardResponse.SUCCESS;

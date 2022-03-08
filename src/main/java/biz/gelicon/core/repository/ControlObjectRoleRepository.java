@@ -24,7 +24,7 @@ public class ControlObjectRoleRepository implements TableRepository<ControlObjec
         ResourceDatabasePopulator databasePopulator = new ResourceDatabasePopulator(resource);
         databasePopulator.setSqlScriptEncoding("UTF-8");
         databasePopulator.execute(jdbcTemplate.getDataSource());
-        logger.info("proguserrole created");
+        logger.info("controlobjectrole created");
     }
 
     @Override

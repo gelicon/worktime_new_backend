@@ -10,10 +10,12 @@ public class ConstantForControllers {
             "Возвращает один объект по идентификатору, если он указан. "
                     + "Если идентификатор отсутствует - возвращается объект с пустым идентификатором "
                     + "и полями, заполненными значениями по умолчанию";
-    public static final String SAVE_OPERATION_SUMMARY = "Сохранение объекта (добавление или изменение)";
+    //public static final String SAVE_OPERATION_SUMMARY = "Сохранение объекта (добавление или изменение)";
+    public static final String SAVE_OPERATION_SUMMARY = "Сохранение";
     public static final String SAVE_OPERATION_DESCRIPTION = "Сохраняет объект. "
             + "Объект с пустым идентификатором добавляется, с непустым - изменяется";
-    public static final String DELETE_OPERATION_SUMMARY = "Удаление одного или нескольких объектов";
+    //public static final String DELETE_OPERATION_SUMMARY = "Удаление одного или нескольких объектов";
+    public static final String DELETE_OPERATION_SUMMARY = "Удаление";
     public static final String DELETE_OPERATION_DESCRIPTION = "Удаляет один или несколько объектов. "
             + "Идентификаторы удаляемых объектов перечисленны через запятую.";
 
