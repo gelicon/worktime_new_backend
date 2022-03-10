@@ -216,7 +216,8 @@ public class ProguserController {
         // получаем провайдера
         CredentialProvider<String> crprovider = credentialProviderFactory.getProvider(
                 CredentialProvider.CredentialProviderType.AuthByPassword);
-        if (!crprovider.checkAuthentication(pu.getProguserId(), dto.getOldPassword())) {
+        String oldPassword = dto.getOldPassword();
+        if (!crprovider.checkAuthentication(pu.getProguserId(), oldPassword)) {
             throw new IncorrectUserOrPasswordException();
         }
         crprovider.updateAuthentication(pu.getProguserId(), dto.getNewPassword(), false);

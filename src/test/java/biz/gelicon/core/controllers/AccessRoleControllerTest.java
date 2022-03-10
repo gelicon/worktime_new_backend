@@ -1,12 +1,11 @@
 package biz.gelicon.core.controllers;
 
 import biz.gelicon.core.dto.AccessRoleDTO;
-import biz.gelicon.core.response.DataResponse;
-import biz.gelicon.core.view.AccessRoleView;
+import biz.gelicon.core.utils.ConvertUtils;
 import biz.gelicon.core.utils.GridDataOption;
+import biz.gelicon.core.view.AccessRoleView;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -21,7 +20,6 @@ import java.util.List;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -52,10 +50,9 @@ public class AccessRoleControllerTest extends IntergatedTest {
                 .andExpect(status().isOk())
                 .andReturn();
         String content = result.getResponse().getContentAsString();
-        // todo
         //  Чудеса, добавляет в начало {"result": и удаляет закрывающую квадратную скобку в конце
-        content = content.substring(10) + "]";
-        logger.info("content = " + content);
+        // подправим
+        content = ConvertUtils.correctMvcResult(content);
         List<AccessRoleView> accessRoleViewList =
                 objectMapper.readValue(content, new TypeReference<>() {
                 });

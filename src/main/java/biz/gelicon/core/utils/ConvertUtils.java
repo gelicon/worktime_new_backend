@@ -125,4 +125,23 @@ public class ConvertUtils {
                 .collect(Collectors.joining(",", "(", ")"));
     }
 
+    /**
+     * Исправляет MvcResult result для списка
+     * убирает из начала {"result":
+     * добавляет в конце ]
+     */
+    public static String correctMvcResult(String content) {
+        if (content == null || content.isBlank()) return content;
+        // Добавим квадратную скобку в конец, если ее нет
+        if (!content.substring(content.length()-1).equals("]")) {
+            content = content + "]";
+        }
+        // Удалим из начала {"result":   если есть
+        String bad = "{\"result\":";
+        if (content.startsWith(bad)){
+            content = content.substring(bad.length());
+        }
+        return content;
+    }
+
 }

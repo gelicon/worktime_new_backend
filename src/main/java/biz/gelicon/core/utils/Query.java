@@ -89,7 +89,6 @@ public class Query<T> {
         } catch (Exception e) {
             throw new FetchQueryException("SQL execute : " + sql, e);
         }
-
     }
 
     public List<T> execute() {

@@ -4,8 +4,13 @@ import biz.gelicon.core.dto.NewProgUserPasswordDTO;
 import biz.gelicon.core.dto.PasswordDTO;
 import biz.gelicon.core.model.Proguser;
 import biz.gelicon.core.model.Progusergroup;
+import biz.gelicon.core.utils.ConvertUtils;
 import biz.gelicon.core.utils.GridDataOption;
+import biz.gelicon.core.view.ControlObjectView;
+import biz.gelicon.core.view.ProguserView;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Sort;
@@ -13,6 +18,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
@@ -25,9 +32,11 @@ public class ProguserControllerTest extends IntergatedTest {
     private static final String CONTOURE = "admin";
     private static final String MODULE = "credential";
 
+    private final ObjectMapper mapper = new ObjectMapper();
+
     @BeforeAll
     public static void setup() {
-        token = "e9b3c034-fdd5-456f-825b-4c632f2053ac"; //root
+        token = "e9b3c034-fdd5-456f-825b-4c632f2053ac"; //SYSDBA
     }
 
     @Test
@@ -38,15 +47,22 @@ public class ProguserControllerTest extends IntergatedTest {
                 .addSort("proguserId", Sort.Direction.ASC)
                 .build();
 
-        /*
-        this.mockMvc.perform(post(buildUrl("proguser/getlist",CONTOURE,MODULE))
+        MvcResult result = this.mockMvc.perform(post(buildUrl("proguser/getlist",CONTOURE,MODULE))
                 .content(new ObjectMapper().writeValueAsString(options))
                 .contentType(MediaType.APPLICATION_JSON))
                 //.andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("\"rowCount\":4")));
+                //.andExpect(content().string(containsString("\"rowCount\":4")));
+                .andReturn();
+        String content = result.getResponse().getContentAsString();
+        // подправим
+        content = ConvertUtils.correctMvcResult(content);
 
-         */
+        List<ProguserView> actual
+                = mapper.readValue(content, new TypeReference<>() {});
+
+        // Список должен быть не пустым
+        Assertions.assertTrue(actual.size() > 1);
 
         // проверка быстрого фильтра eq
         options = new GridDataOption.Builder()
@@ -69,16 +85,26 @@ public class ProguserControllerTest extends IntergatedTest {
         options = new GridDataOption.Builder()
                 .pagination(1, 25)
                 .addSort("proguserId", Sort.Direction.DESC)
-                .addFilter("quick.proguserName.like","SYSDBA")
+                .addFilter("quick.proguserFullName.like","дмин")
                 .build();
 
 
-        this.mockMvc.perform(post(buildUrl("proguser/getlist",CONTOURE,MODULE))
+        result = this.mockMvc.perform(post(buildUrl("proguser/getlist",CONTOURE,MODULE))
                 .content(new ObjectMapper().writeValueAsString(options))
                 .contentType(MediaType.APPLICATION_JSON))
                 //.andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("\"rowCount\":3")));
+                //.andExpect(content().string(containsString("\"rowCount\":3")));
+                .andReturn();
+        content = result.getResponse().getContentAsString();
+        // подправим
+        content = ConvertUtils.correctMvcResult(content);
+
+        List<ProguserView> actual1
+                = mapper.readValue(content, new TypeReference<>() {});
+
+        // Список должен меньшще
+        Assertions.assertTrue(actual1.size() < actual.size());
 
         // проверка именованного фильтра
         options = new GridDataOption.Builder()
@@ -87,16 +113,10 @@ public class ProguserControllerTest extends IntergatedTest {
                 .addFilter("proguserGroupId", Progusergroup.EVERYONE)
                 .build();
 
-
-        this.mockMvc.perform(post(buildUrl("proguser/getlist",CONTOURE,MODULE))
-                .content(new ObjectMapper().writeValueAsString(options))
-                .contentType(MediaType.APPLICATION_JSON))
-                //.andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(content().string(containsString("\"rowCount\":4")));
     }
 
     @Test
+    // Поиск
     public void searchFullText() throws Exception {
         GridDataOption options = new GridDataOption.Builder()
                 .pagination(1, 25)
@@ -109,7 +129,7 @@ public class ProguserControllerTest extends IntergatedTest {
                 .contentType(MediaType.APPLICATION_JSON))
                 //.andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("\"rowCount\":1")));
+                .andExpect(content().string(containsString("\"rowCount\":2")));
 
     }
 
@@ -120,7 +140,7 @@ public class ProguserControllerTest extends IntergatedTest {
 
         // проверка получения записи для редактирования
         MvcResult result = this.mockMvc.perform(post(buildUrl("proguser/get",CONTOURE,MODULE))
-                .content("1")
+                .content("2")
                 .contentType(MediaType.APPLICATION_JSON))
                 //.andDo(print())
                 .andExpect(status().isOk())
@@ -153,6 +173,8 @@ public class ProguserControllerTest extends IntergatedTest {
     }
 
     @Test
+    @Transactional
+    @Rollback
     public void insertAndDeleteTest() throws Exception {
         // проверка получения записи для вставки
         MvcResult result = this.mockMvc.perform(post(buildUrl("proguser/get",CONTOURE,MODULE))
@@ -189,7 +211,7 @@ public class ProguserControllerTest extends IntergatedTest {
                 .andExpect(content().string(containsString(String.format("\"%s\":\"%s\"",fldName,checkValue))))
                 .andReturn();
         content = result.getResponse().getContentAsString();
-        Proguser view = new ObjectMapper().readValue(content,Proguser.class);
+        ProguserView view = new ObjectMapper().readValue(content,ProguserView.class);
 
         //удаление записи
         this.mockMvc.perform(post(buildUrl("proguser/delete",CONTOURE,MODULE))
@@ -206,7 +228,7 @@ public class ProguserControllerTest extends IntergatedTest {
     @Transactional
     @Rollback
     public void changePassword() throws Exception {
-        PasswordDTO pswd = new PasswordDTO("pswd", "newpassword");
+        PasswordDTO pswd = new PasswordDTO("masterkey", "newpassword");
 
         this.mockMvc.perform(post(buildUrl("/proguser/changepswd",CONTOURE,MODULE))
                 .content(new ObjectMapper().writeValueAsString(pswd))
@@ -214,13 +236,14 @@ public class ProguserControllerTest extends IntergatedTest {
                 //.andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().string(not(containsString("\"errorCode\":"))));
-
     }
 
     @Test
     @Transactional
     @Rollback
     public void setPassword() throws Exception {
+        // 4 WORKER	Работник
+        // временный пароль
         NewProgUserPasswordDTO pswd = new NewProgUserPasswordDTO(4, "newpassword",1);
 
         this.mockMvc.perform(post(buildUrl("/proguser/setpswd",CONTOURE,MODULE))
@@ -229,7 +252,6 @@ public class ProguserControllerTest extends IntergatedTest {
                 //.andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().string(not(containsString("\"errorCode\":"))));
-
     }
 
 

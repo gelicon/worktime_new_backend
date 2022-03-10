@@ -84,5 +84,8 @@ public class ControlObjectView {
         return controlobjectroleId!=null?1:0;
     }
 
+    // сеттер тоже нужен для преобразований из json-ов
+    public void setControlObjectRoleAccessFlag(Integer value) {}
+
 }
 
