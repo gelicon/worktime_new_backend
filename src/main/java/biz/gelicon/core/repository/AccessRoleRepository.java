@@ -188,6 +188,8 @@ public class AccessRoleRepository implements TableRepository<AccessRole> {
         bindWithProgUser(2, 2);
         // Пользователь 2-ADMIN связан с ролью 3-EDIZM
         bindWithProgUser(3, 2);
+        // Пользователь 4-WORKER связан с ролью 3-EDIZM
+        bindWithProgUser(3, 4);
 
         //Роль 3- EDIZM связана с всеми функциями edizm
         // Единицы измерения: Получение списка объектов

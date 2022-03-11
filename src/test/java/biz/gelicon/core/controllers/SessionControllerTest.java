@@ -2,10 +2,12 @@ package biz.gelicon.core.controllers;
 
 import biz.gelicon.core.utils.GridDataOption;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MvcResult;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -20,7 +22,7 @@ public class SessionControllerTest extends IntergatedTest {
 
     @BeforeAll
     public static void setup() {
-        token = "e9b3c034-fdd5-456f-825b-4c632f2053ac"; //root
+        token = "e9b3c034-fdd5-456f-825b-4c632f2053ac"; // SYSDBA
     }
 
     @Test
@@ -31,12 +33,15 @@ public class SessionControllerTest extends IntergatedTest {
                 .addSort("proguserAuthDateCreate", Sort.Direction.DESC)
                 .build();
 
-        this.mockMvc.perform(post(buildUrl("session/getlist",CONTOURE,MODULE))
+        MvcResult result = this.mockMvc.perform(post(buildUrl("session/getlist",CONTOURE,MODULE))
                 .content(new ObjectMapper().writeValueAsString(options))
                 .contentType(MediaType.APPLICATION_JSON))
                 //.andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("\"proguserAuthToken\":")));
+                //.andExpect(content().string(containsString("\"proguserAuthToken\":")));
+                .andReturn();
+        String content = result.getResponse().getContentAsString();
+        Assertions.assertTrue(content.contains("\"proguserAuthToken\":"));
 
         // проверка быстрого фильтра eq
         options = new GridDataOption.Builder()
@@ -58,7 +63,7 @@ public class SessionControllerTest extends IntergatedTest {
         options = new GridDataOption.Builder()
                 .pagination(1, 25)
                 .addSort("proguserAuthDateCreate", Sort.Direction.DESC)
-                .addFilter("quick.proguserAuthToken.like","2222222")
+                .addFilter("quick.proguserAuthToken.like","456f-825b")
                 .build();
 
 

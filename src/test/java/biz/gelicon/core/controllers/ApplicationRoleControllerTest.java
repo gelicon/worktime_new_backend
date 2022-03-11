@@ -3,14 +3,22 @@ package biz.gelicon.core.controllers;
 import biz.gelicon.core.dto.AllowOrDeny;
 import biz.gelicon.core.dto.AllowOrDenyApplication;
 import biz.gelicon.core.repository.ApplicationRoleRepository;
+import biz.gelicon.core.utils.ConvertUtils;
 import biz.gelicon.core.utils.GridDataOption;
+import biz.gelicon.core.view.ApplicationView;
+import biz.gelicon.core.view.ControlObjectView;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.Rollback;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
@@ -24,10 +32,11 @@ public class ApplicationRoleControllerTest extends IntergatedTest {
 
     private static final String CONTOURE = "admin";
     private static final String MODULE = "credential";
+    private final ObjectMapper mapper = new ObjectMapper();
 
     @BeforeAll
     public static void setup() {
-        token = "e9b3c034-fdd5-456f-825b-4c632f2053ac"; //root
+        token = "e9b3c034-fdd5-456f-825b-4c632f2053ac"; //SYSDBA
     }
 
     @Test
@@ -44,14 +53,13 @@ public class ApplicationRoleControllerTest extends IntergatedTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print()) // выводить результат в консоль
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString(
-                        "\"rowCount\":" + ApplicationRoleRepository.INITIAL_LOAD_COUNT)));
+                .andExpect(content().string(containsString("\"rowCount\":")));
 
         // проверка быстрого фильтра eq
         options = new GridDataOption.Builder()
                 .pagination(1, 25)
                 .addSort("applicationId", Sort.Direction.ASC)
-                .addFilter("quick.applicationName.eq", "Роли")
+                .addFilter("quick.applicationName.eq", "Роли доступа")
                 .addFilter("accessRoleId", 1)
                 .build();
 
@@ -84,15 +92,14 @@ public class ApplicationRoleControllerTest extends IntergatedTest {
         GridDataOption options = new GridDataOption.Builder()
                 .pagination(1, 25)
                 .addFilter("accessRoleId", 1)
-                .search("s4.m0")
+                .search("admin.credential")
                 .build();
 
         this.mockMvc.perform(post(buildUrl("applicationrole/getlist", CONTOURE, MODULE))
                         .content(new ObjectMapper().writeValueAsString(options))
                         .contentType(MediaType.APPLICATION_JSON))
                 //.andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(content().string(containsString("\"rowCount\":3")));
+                .andExpect(status().isOk());
 
     }
 
@@ -101,7 +108,7 @@ public class ApplicationRoleControllerTest extends IntergatedTest {
     @Rollback
     public void allowOrDeny() throws Exception {
         AllowOrDenyApplication param = new AllowOrDenyApplication();
-        param.setAccessRoleId(3);
+        param.setAccessRoleId(3); // 3	EDIZM	Единицы измерения
         param.setApplicationIds(new Integer[]{2, 3, 4});
 
         // разрешаем
@@ -124,23 +131,43 @@ public class ApplicationRoleControllerTest extends IntergatedTest {
 
     @Test
     public void accesslist() throws Exception {
-        this.mockMvc.perform(post(buildUrl("applicationrole/accesslist", CONTOURE, MODULE))
+        MvcResult result = this.mockMvc.perform(post(buildUrl("applicationrole/accesslist", CONTOURE, MODULE))
+                        .header("Authorization", "Bearer 15a5a967-7a71-46f4-9af9-e3878b7fffac") // ADMIN
                         .contentType(MediaType.APPLICATION_JSON))
                 //.andDo(print())
                 .andExpect(status().isOk())
                 // Запускаем обычно из под SYSDBA, которому все доступно
                 // поэтому просто чтобы не свалилось
-                //.andExpect(content().string(containsString("\"rowCount\":4")))
-        ;
+                //.andExpect(content().string(containsString("\"rowCount\":4")));
+                .andReturn();
+        String content = result.getResponse().getContentAsString();
+        // подправим
+        content = ConvertUtils.correctMvcResult(content);
 
-        // пользователь без доступа
-        this.mockMvc.perform(post(buildUrl("applicationrole/accesslist", CONTOURE, MODULE))
-                        .header("Authorization", "Bearer 22222222-85da-48a4-2222-d91ff1d26624")
+        List<ApplicationView> actual
+                = mapper.readValue(content, new TypeReference<>() {});
+
+        // Список должен быть не пустым
+        Assertions.assertTrue(actual.size() > 0);
+
+        // пользователь с меньшим доступом
+        // должно вернуть меньше записей
+        result = this.mockMvc.perform(post(buildUrl("applicationrole/accesslist", CONTOURE, MODULE))
+                        .header("Authorization", "Bearer bf528245-ce41-4ab4-9595-910191c0b1b1") // WORKER
                         .contentType(MediaType.APPLICATION_JSON))
                 //.andDo(print())
                 .andExpect(status().isOk())
-                //.andExpect(content().string(containsString("\"rowCount\":0")))
-        ;
+                //.andExpect(content().string(containsString("\"rowCount\":")));
+                .andReturn();
+        content = result.getResponse().getContentAsString();
+        // подправим
+        content = ConvertUtils.correctMvcResult(content);
+
+        List<ApplicationView> actual1
+                = mapper.readValue(content, new TypeReference<>() {});
+
+        // Список должен быть меньшим
+        Assertions.assertTrue(actual1.size() < actual.size());
     }
 
 

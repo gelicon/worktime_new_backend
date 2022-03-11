@@ -83,6 +83,7 @@ public class ControlObjectControllerTest extends IntergatedTest {
         options = new GridDataOption.Builder()
                 .pagination(1, 25)
                 .addSort("controlObjectId", Sort.Direction.ASC)
+                .addFilter("accessRoleId",1)
                 .addFilter("quick.controlObjectName.like","Получение")
                 .build();
 

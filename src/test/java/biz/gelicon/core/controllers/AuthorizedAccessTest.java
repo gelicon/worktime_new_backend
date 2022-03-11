@@ -32,7 +32,7 @@ public class AuthorizedAccessTest extends IntergatedTest {
 
     @BeforeAll
     public static void setup() {
-        token = "15a5a967-7a71-46f4-9af9-e3878b7fffac"; //ADMIN admin
+        token = "bf528245-ce41-4ab4-9595-910191c0b1b1"; //WORKER worker
     }
 
     @Autowired
@@ -60,7 +60,7 @@ public class AuthorizedAccessTest extends IntergatedTest {
 
         //удаление записи
         this.mockMvc.perform(post(buildUrl("/apps/admin/credential/progusergroup/delete"))
-                .content("[1]")         // тут не важно какой id - доступа не должно быть
+                .content("[2]")         // тут не важно какой id - доступа не должно быть
                 .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())

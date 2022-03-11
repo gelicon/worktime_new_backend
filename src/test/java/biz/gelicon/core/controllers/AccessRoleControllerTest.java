@@ -124,10 +124,9 @@ public class AccessRoleControllerTest extends IntergatedTest {
     @Transactional
     @Rollback
     public void updateTest() throws Exception {
-
         // проверка получения записи для редактирования
         MvcResult result = this.mockMvc.perform(post(buildUrl("accessrole/get", CONTOURE, MODULE))
-                        .content("1")
+                        .content("2")
                         .contentType(MediaType.APPLICATION_JSON))
                 //.andDo(print())
                 .andExpect(status().isOk())

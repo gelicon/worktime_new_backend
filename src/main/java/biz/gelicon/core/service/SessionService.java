@@ -38,26 +38,26 @@ public class SessionService  extends BaseService<ProguserAuth> {
 
     // главный запрос. используется в главной таблице
     // в контроллере используется в getlist и save
-    final String mainSQL=
-            "SELECT m0.*," +
-                   "pu.proguser_name," +
-                   "pu.proguser_status_id," +
-                   "cc.capcode_name proguser_status_display " +
-            "FROM proguserauth m0 " +
-                 "INNER JOIN proguser pu on pu.proguser_id=m0.proguser_id " +
-                 "INNER JOIN capcode cc on cc.capcode_id=pu.proguser_status_id " +
-                 "/*FROM_PLACEHOLDER*/ " +
-            "WHERE 1=1 AND " +
-                    "(" +
-                        ":status = 0 OR " +
+    final String mainSQL= ""
+            + " SELECT m0.*,"
+            + "        pu.proguser_name, "
+            + "        pu.proguser_status_id, "
+            + "        CASE "
+            + "          WHEN pu.proguser_status_id = 0 THEN 'Неактивный' "
+            + "          ELSE 'Активный' "
+            + "        END proguser_status_display "
+            + " FROM   proguserauth m0 "
+            + "        INNER JOIN proguser pu ON PU.proguser_id = m0.proguser_id "
+            + " /*FROM_PLACEHOLDER*/ "
+            + " WHERE 1 = 1 "
+            + "    AND (   :status = 0 "
                         // действительный токен
-                        "(:status = 1 AND (m0.proguserauth_dateend is null OR m0.proguserauth_dateend > CURRENT_TIMESTAMP)) OR " +
+            + "         OR (:status = 1 AND (m0.proguserauth_dateend is null OR m0.proguserauth_dateend > CURRENT_TIMESTAMP)) OR "
                         // токен закрыт
-                        "(:status = 2 AND m0.proguserauth_dateend is not null AND m0.proguserauth_dateend <= CURRENT_TIMESTAMP) " +
-                    ") AND " +
-                    "(" +
-                        ":proguserId = 0 OR m0.proguser_id=:proguserId"+
-                    ")" +
+            + "            (:status = 2 AND m0.proguserauth_dateend is not null AND m0.proguserauth_dateend <= CURRENT_TIMESTAMP) "
+            + "        ) AND "
+            + "        (:proguserId = 0 OR m0.proguser_id = :proguserId"
+            + "        )" +
             "/*WHERE_PLACEHOLDER*/ " +  //WHERE_PLACEHOLDER если не пуст, всегда добавляет and, поэтому требуется 1=1
             "/*ORDERBY_PLACEHOLDER*/";
 
