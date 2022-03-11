@@ -8,6 +8,7 @@ import biz.gelicon.core.reports.ReportManagerImpl;
 import biz.gelicon.core.repository.RecreateDatabase;
 import biz.gelicon.core.security.ACL;
 import biz.gelicon.core.utils.TableMetadata;
+import biz.gelicon.core.worktime.RecreateDatabaseWorktime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,9 @@ public class InitApp implements ApplicationRunner {
 
     @Autowired
     RecreateDatabase recreateDatabase;
+
+    @Autowired
+    RecreateDatabaseWorktime recreateDatabaseWorktime;
 
     @Autowired
     ACL acl;
@@ -82,7 +86,10 @@ public class InitApp implements ApplicationRunner {
         TableMetadata.readTableMetadataAnnotation(geliconCorePrefix);
         if (recreatedatabase) { // Пересоздание базы данных
             logger.info("recreateDatabase...");
+            // Ядро
             recreateDatabase.recreate();
+            // worktime
+            recreateDatabaseWorktime.recreate();
             logger.info("recreateDatabase...Ok");
         }
         // первая сборка таблицы доступа

@@ -68,7 +68,6 @@ public class ApplicationService extends BaseService<Application> {
 
     }
 
-
     /**
      * Спикок всех приложений
      */

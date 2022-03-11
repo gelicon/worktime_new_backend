@@ -1,6 +1,12 @@
-package biz.gelicon.core.repository;
+package biz.gelicon.core.worktime;
 
+import biz.gelicon.core.model.Application;
+import biz.gelicon.core.repository.ApplicationRepository;
+import biz.gelicon.core.repository.TableRepository;
+import biz.gelicon.core.service.ApplicationService;
+import biz.gelicon.core.utils.DatabaseUtils;
 import biz.gelicon.core.utils.UsefulUtils;
+import biz.gelicon.core.worktime.controllers.department.DepartmentRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,14 +19,16 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.stream.Collectors;
 
 /**
- * Пересоздание всех таблиц базы данных capital
+ * Пересоздание всех таблиц базы данных worktime
  */
 @Repository
-public class RecreateDatabase {
+public class RecreateDatabaseWorktime {
 
-    static Logger logger = LoggerFactory.getLogger(RecreateDatabase.class);
+    static Logger logger = LoggerFactory.getLogger(RecreateDatabaseWorktime.class);
 
     @Autowired
     private PlatformTransactionManager transactionManager;
@@ -31,60 +39,18 @@ public class RecreateDatabase {
     private JdbcTemplate jdbcTemplate;
 
     @Autowired
-    private CapCodeTypeRepository capCodeTypeRepository;
+    private DepartmentRepository departmentRepositoryy;
     @Autowired
-    private CapCodeRepository capCodeRepository;
-    @Autowired
-    private ProgUserGroupRepository progUserGroupRepository;
-    @Autowired
-    private ProgUserRepository progUserRepository;
-    @Autowired
-    private ProgUserAuthRepository progUserAuthRepository;
-    @Autowired
-    private ControlObjectRepository controlObjectRepository;
-    @Autowired
-    private SqlactionRepository sqlactionRepository;
-    @Autowired
-    private AccessRoleRepository accessRoleRepository;
-    @Autowired
-    private ProguserRoleRepository proguserRoleRepository;
-    @Autowired
-    private ControlObjectRoleRepository controlObjectRoleRepository;
-    @Autowired
-    private ProguserChannelRepository proguserChannelRepository;
-    @Autowired
-    private ProguserCredentialRepository proguserCredentialRepository;
-    @Autowired
-    private ApplicationRepository applicationRepository;
-    @Autowired
-    private ApplicationRoleRepository applicationRoleRepository;
-    @Autowired
-    private ConstantRepository constantRepository;
-    @Autowired
-    private EdizmRepository edizmRepository;
-
     protected TableRepository[] registerRepos;
+
+    @Autowired
+    ApplicationRepository applicationRepository;
 
     public void registerRepo() {
         // здесь регистриуются репозитории. Внимание! В правильном порядке СОЗДАНИЯ таблиц
         registerRepos = new TableRepository[]{
-                // Ядро
-                capCodeTypeRepository,
-                capCodeRepository,
-                progUserGroupRepository,
-                progUserRepository,
-                progUserAuthRepository,
-                controlObjectRepository,
-                sqlactionRepository,
-                accessRoleRepository,
-                proguserRoleRepository,
-                controlObjectRoleRepository,
-                proguserChannelRepository,
-                proguserCredentialRepository,
-                applicationRepository,
-                applicationRoleRepository,
-                constantRepository,
-                edizmRepository
+                // worktime
+                departmentRepositoryy,
         };
     }
 
@@ -108,7 +74,9 @@ public class RecreateDatabase {
         logger.info("Dropping tables ...");
         // удаляем таблицы в обратном порядке
         Arrays.asList(registerRepos).stream()
-                .collect(UsefulUtils.toListReversed()).forEach(r -> r.dropForTest());
+                .collect(UsefulUtils.toListReversed()).forEach(r -> {
+                    r.dropForTest();
+                });
         logger.info("Dropping tables ... Ok");
     }
 
@@ -137,6 +105,7 @@ public class RecreateDatabase {
      */
     public void recreate() {
         // Открываем таранзакцию
+        logger.info("Recreating database for project Worktime");
         defaultTransactionDefinition = new DefaultTransactionDefinition();
         transactionStatus = transactionManager.getTransaction(defaultTransactionDefinition);
         try {
@@ -144,6 +113,7 @@ public class RecreateDatabase {
             drop();
             create();
             load();
+            applicationWorktimeLoad(); // Добавить приложения
             transactionManager.commit(transactionStatus);
         } catch (Exception e) {
             String errText = String.format("Error. Transaction will be rolled back");
@@ -151,6 +121,23 @@ public class RecreateDatabase {
             transactionManager.rollback(transactionStatus);
             throw new RuntimeException(errText, e);
         }
+    }
+
+    /**
+     * Прогрузка таблицы application для проекта worktime
+     */
+    private void applicationWorktimeLoad(){
+        Application[] data = new Application[]{
+                new Application(200, Application.TYPE_GELICON_CORE_APP,
+                        "refbooks.orgstruct.department", "Справочник отделов", "orgstruct", "department"),
+        };
+        applicationRepository.insert(Arrays.asList(data));
+        // Так как мы сами установили ид, то надо переустановить последовательность
+        int i = Collections.max(
+                Arrays.stream(data).map(p -> p.applicationId).collect(Collectors.toList())
+        );
+        DatabaseUtils.setSequence("application_id_gen", i);
+        logger.info(String.format("%d application for project Worktime loaded", data.length));
     }
 
 
