@@ -15,14 +15,25 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Проверка доступа пользователю на объекты контроля
+ */
 @Component
 public class ACL {
     private static final Logger logger = LoggerFactory.getLogger(ACL.class);
     @Autowired
     AccessRoleRepository accessRoleRepository;
 
+    // таблица с доступами
     private Map<String, List<String>> accessTable = new HashMap<>();
 
+    /**
+     * Проверка доступа
+     * @param accobject - объект на который проверяем
+     * @param user - пользователь
+     * @param permission - тип доступа
+     * @return - есть ли доступ
+     */
     public boolean checkPermission(String accobject, UserDetails user, Permission permission) {
         // системному пользователю можно все
         if(((UserDetailsImpl)user).isSysDba()) return true;
@@ -43,6 +54,11 @@ public class ACL {
         return intersect!=null;
     }
 
+    /**
+     * Сборка таблицы доступа
+     * Читает из БД доступы и собирает accessTable
+     * чтобы каждый раз не читать из БД
+     */
     public void buildAccessTable() {
         logger.info("Build ACL...");
         accessTable.clear();

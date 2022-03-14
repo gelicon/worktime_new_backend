@@ -73,30 +73,6 @@ public class DepartmentService extends BaseService<Department> {
     }
 
     /**
-     * Получение записи
-     * @param id - идентификатор
-     * @return - запись
-     */
-    @Operation(summary = ConstantForControllers.GET_OPERATION_SUMMARY,
-            description = ConstantForControllers.GET_OPERATION_DESCRIPTION)
-    @RequestMapping(value = "department/get", method = RequestMethod.POST)
-    @Audit(kinds = {AuditKind.CALL_FOR_EDIT, AuditKind.CALL_FOR_ADD})
-    @CheckPermission
-    public Department get(@RequestBody(required = false) Integer id) {
-        // для добавления
-        if (id == null) {
-            return new Department();
-        } else {
-            Department entity = findById(id);
-            if (entity == null) {
-                throw new NotFoundException(
-                        String.format("Отдел с идентификатором %s не найден", id));
-            }
-            return entity;
-        }
-    }
-
-    /**
      * Получает одну запись по ид
      * @param id - ид
      * @return - запись

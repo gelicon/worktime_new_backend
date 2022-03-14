@@ -27,8 +27,12 @@ public class DepartmentValidator implements Validator {
         Set<ConstraintViolation<Object>> validates = validator.validate(target);
         Department department = (Department) target;
 
-        if(department.getDepartmentId() != null && department.getDepartmentId() == 1) {
+        if (department.getDepartmentId() != null && department.getDepartmentId() == 1) {
             errors.rejectValue("departmentId", "", "Этот отдел запрещено модифицировать");
+        }
+        if (!(department.getDepartmentStatus() == 1 || department.getDepartmentStatus() == 0)) {
+            errors.rejectValue("departmentId", "",
+                    "Статус может быть либо 1 (Действующий) либо 0 (Закрытый)");
         }
         // Формируем список ошибок
         ValidateUtils.fillErrors(errors, validates);

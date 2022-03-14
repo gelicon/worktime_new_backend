@@ -2,6 +2,7 @@ package biz.gelicon.core.repository;
 
 import biz.gelicon.core.model.AccessRole;
 import biz.gelicon.core.model.ControlObject;
+import biz.gelicon.core.model.ControlObjectRole;
 import biz.gelicon.core.model.Proguser;
 import biz.gelicon.core.security.Permission;
 import biz.gelicon.core.service.ControlObjectService;
@@ -127,6 +128,11 @@ public class AccessRoleRepository implements TableRepository<AccessRole> {
      */
     public void bindWithControlObject(Integer accessRoleId, Integer controlObjectId,
             Permission permission) {
+        // Проверим, нет ли уже связи
+        if (controlobjectroleId(controlObjectId, accessRoleId, permission.ordinal()) != 0) {
+            // Связь есть - не добавляем
+            return;
+        }
         String sqlText = " "
                 + " INSERT INTO controlobjectrole ("
                 + "   controlobjectrole_id,"
@@ -158,6 +164,36 @@ public class AccessRoleRepository implements TableRepository<AccessRole> {
         map.put("controlobject_id", controlObjectId);
         map.put("accessrole_id", accessRoleId);
         executeSQL(sqlText, map);
+    }
+
+    /**
+     * Возвращает ид связи контролируемого объекта с ролью
+     * @param controlobjectId - объект
+     * @param accessroleId - роль
+     * @param sqlactionId - тип доступа, как правило 9 - EXECUTE
+     * @return - ид, если связь есть или 0, если не найдено
+     */
+    public int controlobjectroleId(
+            Integer controlobjectId,
+            Integer accessroleId,
+            Integer sqlactionId
+    ) {
+        int controlobjectroleId = 0;
+        if (controlobjectId == null || accessroleId == null || sqlactionId == null) {
+            return controlobjectroleId;
+        }
+        String sqlText = ""
+                + " SELECT controlobjectrole_id "
+                + " FROM   controlobjectrole "
+                + " WHERE  controlobject_id = " + controlobjectId
+                + "   AND  accessrole_id = " + accessroleId
+                + "   AND  sqlaction_id = " + sqlactionId;
+        List<ControlObjectRole> list = findQuery(ControlObjectRole.class, sqlText);
+        if (list.size() == 1) {
+            return list.get(0).getControlobjectroleId();
+        } else {
+            return controlobjectroleId;
+        }
     }
 
 

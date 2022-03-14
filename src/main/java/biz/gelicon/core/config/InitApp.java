@@ -107,7 +107,10 @@ public class InitApp implements ApplicationRunner {
 
             // Заполним таблицу ControlObject
             maintenanceSystemService.fillControlObject(geliconCorePrefix);
-
+            // Заполним таблицу ControlObject для проекта WorkTime
+            recreateDatabaseWorktime.controlObjectRoleLoad();
+            // вторая сборка таблицы доступа
+            acl.buildAccessTable();
         }
 
         logger.info("InitApp running...Ok");

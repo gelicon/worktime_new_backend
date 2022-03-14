@@ -1,9 +1,13 @@
 package biz.gelicon.core.worktime;
 
 import biz.gelicon.core.model.Application;
+import biz.gelicon.core.model.ControlObject;
+import biz.gelicon.core.repository.AccessRoleRepository;
 import biz.gelicon.core.repository.ApplicationRepository;
 import biz.gelicon.core.repository.TableRepository;
+import biz.gelicon.core.security.Permission;
 import biz.gelicon.core.service.ApplicationService;
+import biz.gelicon.core.service.ControlObjectService;
 import biz.gelicon.core.utils.DatabaseUtils;
 import biz.gelicon.core.utils.UsefulUtils;
 import biz.gelicon.core.worktime.controllers.department.DepartmentRepository;
@@ -20,6 +24,7 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -45,6 +50,12 @@ public class RecreateDatabaseWorktime {
 
     @Autowired
     ApplicationRepository applicationRepository;
+
+    @Autowired
+    ControlObjectService controlObjectService;
+
+    @Autowired
+    AccessRoleRepository accessRoleRepository;
 
     public void registerRepo() {
         // здесь регистриуются репозитории. Внимание! В правильном порядке СОЗДАНИЯ таблиц
@@ -113,10 +124,10 @@ public class RecreateDatabaseWorktime {
             drop();
             create();
             load();
-            applicationWorktimeLoad(); // Добавить приложения
+            applicationLoad(); // Добавить приложения
             transactionManager.commit(transactionStatus);
         } catch (Exception e) {
-            String errText = String.format("Error. Transaction will be rolled back");
+            String errText = "Error. Transaction will be rolled back";
             logger.error(errText, e);
             transactionManager.rollback(transactionStatus);
             throw new RuntimeException(errText, e);
@@ -124,20 +135,58 @@ public class RecreateDatabaseWorktime {
     }
 
     /**
-     * Прогрузка таблицы application для проекта worktime
+     * Прогрузка таблицы application для проекта worktime Доступ для роли ADMIN на все приложения
+     * проекта
      */
-    private void applicationWorktimeLoad(){
-        Application[] data = new Application[]{
-                new Application(200, Application.TYPE_GELICON_CORE_APP,
-                        "refbooks.orgstruct.department", "Справочник отделов", "orgstruct", "department"),
-        };
-        applicationRepository.insert(Arrays.asList(data));
-        // Так как мы сами установили ид, то надо переустановить последовательность
-        int i = Collections.max(
-                Arrays.stream(data).map(p -> p.applicationId).collect(Collectors.toList())
+    @Transactional(propagation = Propagation.REQUIRED)
+    private void applicationLoad() {
+        logger.info("Applications for project Worktime...");
+        applicationRepository.insert(new Application(
+                        200,
+                        Application.TYPE_GELICON_CORE_APP,
+                        "refbooks.orgstruct.department",
+                        // Позиция в меню - Справочники-Оргструктура-Отделы
+                        "Справочник отделов",
+                        "orgstruct", // application_exe
+                        "department" // Подмодуль
+                )
         );
-        DatabaseUtils.setSequence("application_id_gen", i);
-        logger.info(String.format("%d application for project Worktime loaded", data.length));
+        // Дадим доступ для роли (2	ADMIN	Администрирование) на приложение
+        applicationRepository.allow(2, 200);
+        // Роль 2-ADMIN связана со всеми контролируемыми объектами
+        // не только администрирования, но и worktime
+        // Добавим все что загружено
+        List<ControlObject> controlObjectList = controlObjectService.getAllList();
+        controlObjectList.forEach(controlObject -> {
+            accessRoleRepository.bindWithControlObject(
+                    2, // ADMIN
+                    controlObject.getControlObjectId(),
+                    Permission.EXECUTE
+            );
+        });
+        // Так как мы сами установили ид, то надо переустановить последовательность
+        DatabaseUtils.setSequence("application_id_gen", 200);
+        logger.info("Applications for project Worktime...Ok");
+    }
+
+    /**
+     * Доступ для роли ADMIN на все контролируемые объекты проекта
+     */
+//    @Transactional(propagation = Propagation.REQUIRED)
+    public void controlObjectRoleLoad() {
+        // Роль 2-ADMIN связана со всеми контролируемыми объектами
+        // не только администрирования, но и worktime
+        // Добавим все что загружено
+        List<ControlObject> controlObjectList = controlObjectService.getAllList();
+        logger.info("controlObjectRole for project Worktime loading...");
+        controlObjectList.forEach(controlObject -> {
+            accessRoleRepository.bindWithControlObject(
+                    2, // ADMIN
+                    controlObject.getControlObjectId(),
+                    Permission.EXECUTE
+            );
+        });
+        logger.info("controlObjectRole for project Worktime loading...Ok");
     }
 
 

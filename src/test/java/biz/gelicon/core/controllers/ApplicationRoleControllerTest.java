@@ -1,12 +1,9 @@
 package biz.gelicon.core.controllers;
 
-import biz.gelicon.core.dto.AllowOrDeny;
 import biz.gelicon.core.dto.AllowOrDenyApplication;
-import biz.gelicon.core.repository.ApplicationRoleRepository;
 import biz.gelicon.core.utils.ConvertUtils;
 import biz.gelicon.core.utils.GridDataOption;
 import biz.gelicon.core.view.ApplicationView;
-import biz.gelicon.core.view.ControlObjectView;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Assertions;

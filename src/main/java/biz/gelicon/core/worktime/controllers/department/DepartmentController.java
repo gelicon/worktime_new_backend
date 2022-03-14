@@ -24,7 +24,7 @@ import java.util.List;
 
 @RestController
 @Tag(name = "Отделы", description = "Контроллер для объектов 'Отделы'")
-@RequestMapping(value = "/v" + Config.CURRENT_VERSION + "/apps/worktime/orgstruct/department",
+@RequestMapping(value = "/v" + Config.CURRENT_VERSION + "/apps/refbooks/orgstruct/department",
         consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE)
 @Transactional
@@ -110,4 +110,5 @@ public class DepartmentController {
         departmentService.deleteByIds(ids);
         return StandardResponse.SUCCESS;
     }
+
 }

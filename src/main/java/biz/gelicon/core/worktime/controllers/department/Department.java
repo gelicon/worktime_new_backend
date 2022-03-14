@@ -1,5 +1,7 @@
 package biz.gelicon.core.worktime.controllers.department;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import javax.persistence.Column;
 import javax.persistence.Id;
 import javax.persistence.Table;
@@ -25,6 +27,9 @@ public class Department {
     @Column(name = "department_status")
     private Integer departmentStatus;
 
+    @Schema(description = "Наименование статуса: 1-Действующий, 0-Закрытый")
+    private String departmentStatusName;
+
     public Integer getDepartmentId() {
         return departmentId;
     }
@@ -47,6 +52,10 @@ public class Department {
 
     public Integer getDepartmentStatus() {
         return departmentStatus;
+    }
+
+    public String getDepartmentStatusName() {
+        return departmentStatus == 1 ? "Действующий" : "Закрытый";
     }
 
     public Department(Integer departmentId, String departmentName, Integer departmentStatus) {
